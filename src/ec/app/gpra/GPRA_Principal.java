@@ -506,19 +506,20 @@ public class GPRA_Principal {
 
 			//Carrega os arquivos de teste, validacao e o arquivo que mapeia a o ID de cada usuario pela
 			//posicao que este usuario aparece nos arquivos de treino e teste
+			File base;
 			File test;
 			File validacao;
 			File usermap;
 			File plain_train = null;
 			if (p_args.getBoolean("use_plain")){
+				base = new File(p_args.getString("base_dir")+partition+".base");
 				test = new File(p_args.getString("base_dir")+partition+".test");
 				validacao = new File(p_args.getString("base_dir")+partition+".validation");
 				usermap = new File(p_args.getString("base_dir")+partition+".train.map");
 				plain_train = new File(p_args.getString("base_dir")+partition+".plain.train");
-	
 			}
 			else{
-			
+				base = new File(p_args.getString("base_dir")+partition+".base");
 				test = new File(p_args.getString("base_dir")+partition+".test");
 				validacao = new File(p_args.getString("base_dir")+partition+".validation");
 				usermap = new File(p_args.getString("base_dir")+partition+".base.usermap");
@@ -528,9 +529,9 @@ public class GPRA_Principal {
 				//dados = new InputData(vf,validacao,test,numItemsToUse,numItemsToSuggest);
 				//System.out.println("0");
 				if (p_args.getBoolean("use_plain"))
-					dados = new InputData(plain_train, usermap, test, validacao, numItemsToUse, numItemsToSuggest,p_args.getBoolean("use_sparse"));
+					dados = new InputData(plain_train, usermap, base, test, validacao, numItemsToUse, numItemsToSuggest,p_args.getBoolean("use_sparse"));
 				else
-					dados = new InputData(vf,validacao,test,usermap,numItemsToUse,numItemsToSuggest); //read data and usermap
+					dados = new InputData(vf, base, validacao,test,usermap,numItemsToUse,numItemsToSuggest); //read data and usermap
 				
 				//dados.read_user_categories(new File(base_dir+"matrix_user_cat_"+partition+".base"));
 				//dados.read_item_categories(new File(base_dir+"matrix_item_cat"));
@@ -598,17 +599,17 @@ public class GPRA_Principal {
 			}
 
 
-			File test_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".test");					
+			File base_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".base");
+			File test_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".test");
 			File usermap_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".base.usermap");
 			InputData dados_reeval;
 			if (p_args.getBoolean("use_plain")){
 				File train_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".plain.train");
 				test_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".test");
 				usermap_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".train.map");
-				dados_reeval = new InputData(train_reeval, usermap_reeval, test_reeval, test_reeval, numItemsToUse, numItemsToSuggest,p_args.getBoolean("use_sparse"));
+				dados_reeval = new InputData(train_reeval, usermap_reeval, base_reeval, test_reeval, test_reeval, numItemsToUse, numItemsToSuggest,p_args.getBoolean("use_sparse"));
 			}else{				
-				dados_reeval = new InputData(vf_reeval,test_reeval,test_reeval,
-					usermap_reeval,numItemsToUse,numItemsToSuggest);
+				dados_reeval = new InputData(vf_reeval,base_reeval, test_reeval,test_reeval, usermap_reeval,numItemsToUse,numItemsToSuggest);
 			}
 			Vector<User> usuarios_reeval = dados_reeval.getUsers();
 			for(User u : usuarios_reeval){

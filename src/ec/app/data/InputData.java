@@ -1,24 +1,21 @@
 package ec.app.data;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 //import lda_gpra.LDARA;
 //import lda_gpra.LDAUser;
+import ec.app.exceptions.MalformedRatingLineException;
 import ec.app.gpra.GPRA_Principal;
+import ec.app.util.CosineSimilarityMatrix;
 import ec.app.util.Metrics;
-import ec.app.util.Pair;
-
+import ec.app.util.Utils;
 
 
 public class InputData {
@@ -29,7 +26,9 @@ public class InputData {
 	//private HashMap<Integer, Integer> map_item_posicao;
 	//private HashMap<Integer, Integer> map_posicao_item;
 	public Map<Integer, Vector<Integer>> testRankings;
-	
+
+	public CosineSimilarityMatrix similarityMatrix;
+	public Map<Integer, Double> popularityByItem;
 	
 	public Vector<User> Usuarios;
 	private int numItems;
@@ -41,7 +40,7 @@ public class InputData {
 	private int numItemsToSuggest;
 	private boolean use_sparse = false;
 	
-	public InputData(Vector<File> inputs, File testInput, File usermap, int numItemsToUse, int numItemsToSuggest) throws IOException{
+	public InputData(Vector<File> inputs, File baseInput, File testInput, File usermap, int numItemsToUse, int numItemsToSuggest) throws IOException{
 		
 		//*********************************************READ MAPS***********************************
 		map_posicao_user = new HashMap<Integer, Integer>();
@@ -214,10 +213,9 @@ public class InputData {
 			System.out.println("Fim outrank - "+t+"(s)");
 		}
 		//********************Outranking Approach(end)****************************
-		
-		
-		
-		
+
+        computePopularityAndSimilarityMatrixFromRatingsFile(baseInput);
+
 		free_map_posicao_user();
 		readTestFile(testInput,"test");
 		//Libera espaço dos rankings de baseline
@@ -237,6 +235,7 @@ public class InputData {
 	 * 
 	 * @param Features_dataset : Dataset where each line corresponds to a pair (user,item)
 	 * @param useritemmap : Maps which lines corresponds to wich user in the dataset 
+	 * @param baseInput : Base rating file, in MovieLens format (userID-tab-itemID-tab-rating)
 	 * @param testInput : Test dataset in movilens format
 	 * @param validationInput : Validation dataset in movilens format
 	 * @param numItemsToUse : Number of items that will be used in the Agg process (this value it is not necessary here, since the process of creating the dataset already considers this)
@@ -244,7 +243,7 @@ public class InputData {
 	 * @throws FileNotFoundException
 	 */
 	
-	public InputData(File Features_dataset, File useritemmap, File testInput,File validationInput, int numItemsToUse, int numItemsToSug, boolean use_sparse) throws FileNotFoundException{
+	public InputData(File Features_dataset, File useritemmap, File baseInput, File testInput,File validationInput, int numItemsToUse, int numItemsToSug, boolean use_sparse) throws FileNotFoundException{
 		Usuarios = new Vector<User>();
 		map_posicao_user = new HashMap<Integer, Integer>();
 		map_user_posicao = new HashMap<Integer, Integer>();
@@ -324,8 +323,8 @@ public class InputData {
 			usr_pos++;
 			
 		}
-				
-		
+		computePopularityAndSimilarityMatrixFromRatingsFile(baseInput);
+
 		readTestFile(testInput, "test");
 		this.numItemsToSuggest = numItemsToSug;
 		readTestFile(validationInput, "validation");
@@ -335,9 +334,9 @@ public class InputData {
 	}
 	
 	
-	public InputData(Vector<File> inputs, File validationInput,File testInput,File usermap, int numItemsToUse, int numItemsToSugg) throws IOException{
+	public InputData(Vector<File> inputs, File baseInput, File validationInput,File testInput,File usermap, int numItemsToUse, int numItemsToSugg) throws IOException{
 		
-		this(inputs,testInput,usermap,numItemsToUse,numItemsToSugg);
+		this(inputs,baseInput, testInput,usermap,numItemsToUse,numItemsToSugg);
 		this.numItemsToSuggest = numItemsToSugg;
 		readTestFile(validationInput, "validation");
 		free_map_user_posicao();
@@ -724,6 +723,92 @@ public class InputData {
 			it++;
 		}
 		
-	}	
-	
+	}
+
+    public static Map<Integer, Vector<Integer>> readRatingsFile(Reader fileContents)
+            throws IOException, MalformedRatingLineException {
+	    Map<Integer, Vector<Integer>> likedItemsByUser = new HashMap<>();
+
+	    Pattern ratingLinePattern = Pattern.compile("(\\d+)\t(\\d+)\t\\d+");
+
+	    BufferedReader br = new BufferedReader(fileContents);
+	    String line;
+	    while (null != (line = br.readLine())) {
+            Matcher m = ratingLinePattern.matcher(line);
+            if (m.matches()) {
+
+                int userId = Integer.parseInt(m.group(1));
+                int itemId = Integer.parseInt(m.group(2));
+
+                Vector<Integer> userLikes;
+                if (likedItemsByUser.containsKey(userId)) {
+                    userLikes = likedItemsByUser.get(userId);
+                } else {
+                    userLikes = new Vector<>();
+                    likedItemsByUser.put(userId, userLikes);
+                }
+                userLikes.add(itemId);
+            } else {
+                throw new MalformedRatingLineException(line);
+            }
+        }
+
+        return likedItemsByUser;
+    }
+
+    private void computePopularityAndSimilarityMatrixFromRatingsFile(File ratingsFile) {
+        Map<Integer, Vector<Integer>> likedItemsByUser;
+        try {
+            likedItemsByUser = readRatingsFile(new FileReader(ratingsFile));
+        } catch (MalformedRatingLineException e) {
+            System.err.println("Malformed rating file line: " + e.getLine());
+            System.exit(1);
+            return;
+        } catch (IOException e) {
+            System.err.print("IOException while reading ratings.");
+            System.exit(1);
+            return;
+        }
+
+        similarityMatrix = new CosineSimilarityMatrix(likedItemsByUser);
+        popularityByItem = Utils.compute_popularity(likedItemsByUser);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

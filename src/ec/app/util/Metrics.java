@@ -299,6 +299,104 @@ public class Metrics {
 		return hits;
 		
 	}
-	
-	
+
+	static double DISCOUNT_BASE = 0.85;
+
+	public static double epc(Vector<Integer> ranking, Map<Integer, Double> popularityByItem, int num_items) {
+	    if (num_items > ranking.size()) {
+	        num_items = ranking.size();
+        }
+
+	    double total = 0.;
+	    double discount = 1;
+        double normalizingConstant = 0.;
+	    for (int i = 0; i < num_items; i++) {
+            int itemId = ranking.get(i);
+
+            double popularity;
+            if (popularityByItem.containsKey(itemId)) {
+                popularity = popularityByItem.get(itemId);
+            } else {
+                popularity = 0.;
+            }
+
+            total += (1 - popularity) * discount;
+
+            normalizingConstant += discount;
+            discount *= DISCOUNT_BASE;
+        }
+
+        return total / normalizingConstant;
+    }
+
+	public static double eild(Vector<Integer> ranking, CosineSimilarityMatrix similarityMatrix, int num_items) {
+		if (num_items > ranking.size()) {
+			num_items = ranking.size();
+		}
+
+		double total = 0.;
+		double normalizingConstant = 0.;
+
+		for (int i = 0; i < num_items; i++) {
+			int itemI = ranking.get(i);
+
+			double totalForI = 0.;
+			double relativeNormalizingConstant = 0.;
+
+			for (int j = 0; j < num_items; j++) {
+			    if (i == j) {
+			    	continue;
+				}
+
+				int itemJ = ranking.get(j);
+
+			    double similarity = similarityMatrix.get(itemI, itemJ);
+			    double relativeDiscount = Math.pow(DISCOUNT_BASE, Math.max(0, j - i - 1));
+
+			    totalForI += similarity * relativeDiscount;
+			    relativeNormalizingConstant += relativeDiscount;
+			}
+
+			if (relativeNormalizingConstant > 0) {
+				totalForI /= relativeNormalizingConstant;
+			}
+
+			double absoluteDiscount = Math.pow(DISCOUNT_BASE, i);
+			total += absoluteDiscount * totalForI;
+			normalizingConstant += absoluteDiscount;
+		}
+
+		if (normalizingConstant > 0) {
+			total /= normalizingConstant;
+		}
+
+		return total;
+	}
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

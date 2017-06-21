@@ -5,13 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.LinkedHashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import ec.app.data.Item;
 import ec.app.data.User;
+import librec.data.DenseMatrix;
 
 public class Utils {
 
@@ -411,6 +409,31 @@ public class Utils {
 		}
 	}
 
-		
+	public static Map<Integer, Double> compute_popularity(Map<Integer, Vector<Integer>> likedItemsByUser) {
+	    Map<Integer, Integer> likesByItem = new HashMap<>();
+
+	    // Stores counts first, divides by number of users afterwards.
+        for (Vector<Integer> likedItems : likedItemsByUser.values()) {
+            for (Integer itemId : likedItems) {
+                if (likesByItem.containsKey(itemId)) {
+                    likesByItem.put(itemId, likesByItem.get(itemId) + 1);
+                } else {
+                    likesByItem.put(itemId, 1);
+                }
+            }
+        }
+
+        int numUsers = likedItemsByUser.size();
+
+        Map<Integer, Double> popularityByItem = new HashMap<>();
+
+        Iterator<Map.Entry<Integer, Integer>> entriesIt = likesByItem.entrySet().iterator();
+        while (entriesIt.hasNext()) {
+            Map.Entry<Integer, Integer> entry = entriesIt.next();
+            popularityByItem.put(entry.getKey(), (double) entry.getValue() / numUsers);
+        }
+
+        return popularityByItem;
+	}
 
 }
