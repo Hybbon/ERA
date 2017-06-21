@@ -372,31 +372,4 @@ public class Metrics {
 
 		return total;
 	}
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
