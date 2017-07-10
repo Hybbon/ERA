@@ -47,7 +47,12 @@ public class GPRA_Problem extends GPProblem implements
 	public double probTop10 = 0;
 	public int timesOnRankings = 0;
 	public double outrank_score = 0;
-	
+
+	private boolean linearMultiObj;
+	private double epc_fitness_weight;
+    private double eild_fitness_weight;
+    private double map_fitness_weight;
+
 	public void setup(final EvolutionState state, final Parameter base) {
 		
 		
@@ -65,9 +70,13 @@ public class GPRA_Problem extends GPProblem implements
 		if (!(input instanceof DoubleData))
 			state.output.fatal("GPData class must subclass from "
 					+ DoubleData.class, base.push(P_DATA), null);
-	
-	
-	}
+
+		linearMultiObj = state.parameters.getBoolean(new Parameter("linear_multiobj"), null, false);
+
+        epc_fitness_weight = state.parameters.getDouble(new Parameter("novelty_coef"), null);
+        eild_fitness_weight = state.parameters.getDouble(new Parameter("diversity_coef"), null);
+        map_fitness_weight = 1. - epc_fitness_weight - eild_fitness_weight;
+    }
 	
 	public void set_data(InputData new_data){
 		this.dados = null;
@@ -196,8 +205,7 @@ public class GPRA_Problem extends GPProblem implements
 			float mean_hits_use = 0;
 			double prec_5_t = 0, prec_5_v = 0, prec_10_t = 0, prec_10_v = 0;
 			double map_5_t = 0, map_5_v = 0, map_10_t = 0, map_10_v = 0;
-			
-			
+
 			//itera pelos usuarios presentes nos rankings
 			for(int user_pos = 0; user_pos<users.size(); user_pos++){
 				
@@ -266,12 +274,6 @@ public class GPRA_Problem extends GPProblem implements
 				double prec_test_aux = Metrics.precision(testRanking, saida_items,null,numItemsToSuggest);
 				double prec_val_aux = Metrics.precision(validationRanking, saida_items, user_hits,numItemsToSuggest);
 
-				double epc_test_aux = Metrics.epc(testRanking, dados.popularityByItem, numItemsToSuggest);
-                double epc_val_aux = Metrics.epc(validationRanking, dados.popularityByItem, numItemsToSuggest);
-
-                double eild_test_aux = Metrics.eild(testRanking, dados.similarityMatrix, numItemsToSuggest);
-                double eild_val_aux = Metrics.eild(validationRanking, dados.similarityMatrix, numItemsToSuggest);
-
 				//System.out.println(saida_items);
 				//System.out.println(saida_scores);
 				
@@ -305,13 +307,20 @@ public class GPRA_Problem extends GPProblem implements
 				prec_test += prec_test_aux;
 				prec_val += prec_val_aux;
 
-                epc_test += epc_test_aux;
-                epc_val += epc_val_aux;
+				if (linearMultiObj) {
+                    double epc_test_aux = Metrics.epc(testRanking, dados.popularityByItem, numItemsToSuggest);
+                    double epc_val_aux = Metrics.epc(validationRanking, dados.popularityByItem, numItemsToSuggest);
 
-				eild_test += eild_test_aux;
-                eild_val += eild_val_aux;
+                    double eild_test_aux = Metrics.eild(testRanking, dados.similarityMatrix, numItemsToSuggest);
+                    double eild_val_aux = Metrics.eild(validationRanking, dados.similarityMatrix, numItemsToSuggest);
 
-				
+                    epc_test += epc_test_aux;
+                    epc_val += epc_val_aux;
+
+                    eild_test += eild_test_aux;
+                    eild_val += eild_val_aux;
+                }
+
 				//*************************LOG******************
 				/*
 				prec_5_t += Metrics.precision_at(users.get(user_pos).getTestRanking(), saida_items,5);
@@ -353,23 +362,28 @@ public class GPRA_Problem extends GPProblem implements
 			double map_test = prec_test/dados.getNumUsersTestHasElem();
 			double map_val = prec_val/dados.getNumUsersValHasElem();
 
-            double mean_epc_test = epc_test/dados.getNumUsersTestHasElem();
-            double mean_epc_val = epc_val/dados.getNumUsersValHasElem();
+			double val_fitness;
+            double test_fitness;
 
-            double mean_eild_test = eild_test/dados.getNumUsersTestHasElem();
-            double mean_eild_val = eild_val/dados.getNumUsersValHasElem();
+			if (linearMultiObj) {
+                double mean_epc_test = epc_test/dados.getNumUsersTestHasElem();
+                double mean_epc_val = epc_val/dados.getNumUsersValHasElem();
 
-            double epc_fitness_weight = 0.33;
-            double eild_fitness_weight = 0.33;
-            double map_fitness_weight = 1. - epc_fitness_weight - eild_fitness_weight;
+                double mean_eild_test = eild_test/dados.getNumUsersTestHasElem();
+                double mean_eild_val = eild_val/dados.getNumUsersValHasElem();
 
-            double val_fitness = map_val * map_fitness_weight +
-                mean_epc_val * epc_fitness_weight +
-                mean_eild_val * eild_fitness_weight;
 
-            double test_fitness = map_test * map_fitness_weight +
-                mean_epc_test * epc_fitness_weight +
-                mean_eild_test * eild_fitness_weight;
+                val_fitness = map_val * map_fitness_weight +
+                        mean_epc_val * epc_fitness_weight +
+                        mean_eild_val * eild_fitness_weight;
+
+                test_fitness = map_test * map_fitness_weight +
+                        mean_epc_test * epc_fitness_weight +
+                        mean_eild_test * eild_fitness_weight;
+            } else {
+                val_fitness = map_val;
+                test_fitness = map_test;
+            }
 
 			// the fitness better be KozaFitness!
 			KozaFitness f = ((KozaFitness) ind.fitness);

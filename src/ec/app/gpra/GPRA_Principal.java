@@ -75,21 +75,21 @@ public class GPRA_Principal {
 	private static int curr_run = -1;
 	private static int init_run = 0;
 	private static String out_dir_global = "";
-	
-	
-	
-	
+
+
+
+
 	public static HashMap<String,String> get_curr_status(){
-		
+
 		HashMap<String, String> newmap = new HashMap<String, String>();
-		
+
 		newmap.put("part", ""+curr_part);
 		newmap.put("run",""+curr_run);
-		newmap.put("out_dir",""+out_dir_global);		
+		newmap.put("out_dir",""+out_dir_global);
 		return newmap;
 	}
-	
-	
+
+
 
 	public static InputData getData(){
 		return dados;
@@ -98,23 +98,23 @@ public class GPRA_Principal {
 	public static void SetData(InputData inputdata){
 		dados = inputdata;
 	}
-	
+
 	public static int getNumUsedRanks(){
-		return dados.getNumRankings(); 
+		return dados.getNumRankings();
 	}
-	
+
 	public static int get_numItemsToUse(){
 		return numItemsToUse;
 	}
-	
+
 	public static int get_use_niching(){
 		return use_niching;
 	}
-	
+
 	//funcao usada para armazenar os melhores indivíduos de cada run
 	public static void backup_individual(Vector<Individual>bkp_vet,Individual ind, int pos){
 		if (bkp_vet.get(pos) != null){
-				if (((KozaFitness)ind.fitness).standardizedFitness() < 
+				if (((KozaFitness)ind.fitness).standardizedFitness() <
 						((KozaFitness)bkp_vet.get(pos).fitness).standardizedFitness()){
 					//eh preciso clonar o individuo para que ele não tenha a sua fitness alterada
 					//uma vez que essa fitness eh calculada na validacao e o individuo sera reavaliado
@@ -124,16 +124,16 @@ public class GPRA_Principal {
 		else{
 			bkp_vet.set(pos, (Individual) ind.clone());
 		}
-		
-		
+
+
 		if (best_individual_all != null){
-		
-			if (((KozaFitness)ind.fitness).standardizedFitness() < 
+
+			if (((KozaFitness)ind.fitness).standardizedFitness() <
 			((KozaFitness)best_individual_all.fitness).standardizedFitness()){
 				best_individual_all = (Individual) ind.clone();
 			}
 			else{
-				if 	(((KozaFitness)ind.fitness).standardizedFitness() == 
+				if 	(((KozaFitness)ind.fitness).standardizedFitness() ==
 						((KozaFitness)best_individual_all.fitness).standardizedFitness()){
 					best_individual_all = (Individual) ind.clone();
 				}
@@ -142,28 +142,28 @@ public class GPRA_Principal {
 		else{
 			best_individual_all = (Individual) ind.clone();
 		}
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Reavalia os melhores individuos para cada rodada, para cada partição e o melhor individuo de todas as gerações/rodadas
-	 * 
+	 *
 	 * @param data_folder pasta onde estão os rankings de entrada
 	 * @param parameters Parametros usados no EvalutionState
 	 * @param output_dir
 	 * @throws IOException
 	 */
 	public static void reeval_best_individuals(String data_folder,ParameterDatabase parameters, String output_dir) throws IOException{
-		
-		
+
+
 		//resultados das partições armazenadas por linha
-		Vector<Double> map_best_all = new Vector<Double>(); 
+		Vector<Double> map_best_all = new Vector<Double>();
 		Vector<Vector<Double>> map_best_individuals_run = new Vector<Vector<Double>>();
 		Vector<Vector<Double>> map_best_individuals_par = new Vector<Vector<Double>>();
-		
-		
-		
+
+
+
 		//READ THE DATA TO REEVALUATE THE BEST INDIVIDUAL
 		Set<String> reeval_rankings = new HashSet<String>();
 
@@ -174,43 +174,43 @@ public class GPRA_Principal {
 			if (listOfFiles_reeval[i].isFile() && listOfFiles_reeval[i].getName().contains(".out") ) {
 				String rank_name = listOfFiles_reeval[i].getName().substring(3);
 				reeval_rankings.add(rank_name);
-			} 
+			}
 		}
-		
+
 		MySimpleEvolutionState evolution_state = (MySimpleEvolutionState)Evolve.initialize(parameters, 0);
 		PrintWriter out_reeval = new PrintWriter(new BufferedWriter(new FileWriter(output_dir+"best_individuals.log")));
 		String ind_part_str = "";
 		String ind_run_str = "";
 		String ind_best_str = "";
-		
+
 		for (int part = 1; part <= 5; part++){
 			map_best_individuals_par.add(new Vector<Double>());
 			map_best_individuals_run.add(new Vector<Double>());
 			String partition = "u"+part;
-			
+
 			Vector<File> vf_reeval = new Vector<File>();
 			for (String input_rank : reeval_rankings){
 				vf_reeval.add(new File(data_folder+partition+"-"+input_rank));
 			}
 
 
-			File test_reeval = new File(data_folder+partition+".test");					
+			File test_reeval = new File(data_folder+partition+".test");
 			File usermap_reeval = new File(data_folder+partition+".base.usermap");
 
 			InputData dados_reeval = new InputData(vf_reeval,test_reeval,test_reeval,
-					usermap_reeval,numItemsToUse,numItemsToSuggest); 
+					usermap_reeval,numItemsToUse,numItemsToSuggest);
 
 			//******************** END READING ***************************************
 
 			evolution_state.startFresh();
 			GPRA_Problem problem = (GPRA_Problem) evolution_state.evaluator.p_problem;
-			
-	
-			
+
+
+
 			((ec.Problem)problem).prepareToEvaluate(evolution_state,0);
 			((GPRA_Problem)problem).set_data(dados_reeval);
-			((GPRA_Problem)problem).set_save_ranking(true);      
-				
+			((GPRA_Problem)problem).set_save_ranking(true);
+
 			//Reevaluate the best individuals of each run
 			for (Individual ind : best_individuals_by_run){
 				if (ind != null){
@@ -231,25 +231,25 @@ public class GPRA_Principal {
 					map_best_individuals_par.lastElement().add(((KozaFitness)ind.fitness).standardizedFitness());
 				}
 			}
-			
-			
+
+
 			System.out.println("Best");
 			System.out.println(((KozaFitness)best_individual_all.fitness).standardizedFitness());
 			//Reevaluate the best individual of all runs x partitions
-			
+
 			best_individual_all.evaluated = false;
 			problem.evaluate(evolution_state, best_individual_all, 0, 0);
 			//ind_best_str = best_individual_all.genotypeToStringForHumans()+"\n";
 			map_best_all.add(((KozaFitness)best_individual_all.fitness).standardizedFitness());
-			
-			
-			
-			
-			
+
+
+
+
+
 			((ec.Problem)problem).finishEvaluating(evolution_state,0);
-			
-			
-			
+
+
+
 			PrintWriter print_ranking = new PrintWriter(new BufferedWriter(
 					new FileWriter(output_dir+partition+"best_all"+"_GPRA.out")));
 
@@ -258,19 +258,19 @@ public class GPRA_Principal {
 			}
 
 			print_ranking.close();
-			
-			
+
+
 		}
-		
+
 		Evolve.cleanup(evolution_state);
 		out_reeval.write("Map Best Individuals by partition\n");
-		
+
 		//Na impressao dos resultados a linha e a coluna das matrizes de resultado estão invertidas
 		//fiz isso para que os resultados por indivíduo aparecam por linha na saída
 		// 		u1;u2;u3;u4;u5
 		//i1	xx;xx;xx;xx;xx
 		//i2	xx;x;;xx;xx;xx
-		
+
 		for (int k = 0; k < 5; k++){
 			ind_part_str += best_individuals_by_part.get(k).genotypeToStringForHumans()+"\n";
 			String s = map_best_individuals_par.get(0).get(k)+""; //
@@ -278,11 +278,11 @@ public class GPRA_Principal {
 				s += ";"+map_best_individuals_par.get(h).get(k);
 			}
 			out_reeval.write(s+"\n");
-			
+
 		}
-		
+
 		out_reeval.write("Map Best Individuals by run\n");
-		
+
 		for (int k = 0; k < nruns; k++){
 			ind_run_str += best_individuals_by_run.get(k).genotypeToStringForHumans()+"\n";
 			String s = map_best_individuals_run.get(0).get(k)+"";
@@ -292,30 +292,30 @@ public class GPRA_Principal {
 			out_reeval.write(s+"\n");
 		}
 
-		
+
 		out_reeval.write("Map Best Individual\n");
 		String s = ""+map_best_all.get(0);
 		for (int k = 1; k < 5; k++){
 			s += ";"+map_best_all.get(k);
 		}
-		
+
 		out_reeval.write(s+"\n");
 		ind_best_str = best_individual_all.genotypeToStringForHumans();
-		
+
 		out_reeval.write("Best Individuals Phenotype\n");
 		out_reeval.write(ind_part_str);
 		out_reeval.write(ind_run_str);
-		out_reeval.write(ind_best_str);		
+		out_reeval.write(ind_best_str);
 		out_reeval.close();
 		System.out.println("FIM");
-		
-		
+
+
 	}
 
 	public static void main(String args[]) throws IOException, URISyntaxException{
 
-		//TODO create a parameter class	
-		String partition= "";					
+		//TODO create a parameter class
+		String partition= "";
 		/*//String base_dir = "/home/samuel/workspace/GP_RankingAggregation/rankings/20151202/ml-100k/";
 		String base_dir = "/home/samuel/workspace/Gen_dataset_GPRA/ml100k_plain/";
 		boolean use_plain = false;
@@ -452,17 +452,17 @@ public class GPRA_Principal {
 			}
 		}
 		*/
-		
+
 		Namespace p_args = ParameterParser.parse_arguments(args);
-		
-		
+
+
 		out_dir_global = p_args.getString("out_dir");
-		
+
 		//int nruns = 5;
 		File output_dir = new File(p_args.getString("out_dir"));
 		if (!output_dir.exists())
 			output_dir.mkdir();
-		
+
 		//vetores com os melhores individuos por rodada e por particao
 		best_individuals_by_run = new Vector<Individual>(nruns);
 		best_individuals_by_part = new Vector<Individual>(nruns);
@@ -470,11 +470,11 @@ public class GPRA_Principal {
 			best_individuals_by_part.add(null);
 			best_individuals_by_run.add(null);
 		}
-		//********************************end*********************************	
-			
-		
+		//********************************end*********************************
+
+
 		Set<String> input_rankings = new HashSet<String>();
-		
+
 		File folder = new File(p_args.getString("base_dir"));
 		File[] listOfFiles = folder.listFiles();
 
@@ -482,20 +482,20 @@ public class GPRA_Principal {
 			if (listOfFiles[i].isFile() && listOfFiles[i].getName().contains(".out") ) {
 				String rank_name = listOfFiles[i].getName().substring(3);
 				input_rankings.add(rank_name);
-			} 
+			}
 		}
-		    
-		
-		
-		
+
+
+
+
 		//iteração para as partições
 		long total_time2 = System.currentTimeMillis();
-		
+
 		for(int part = p_args.getInt("pini"); part <= p_args.getInt("pend"); part++){
 			dados = null;
 			curr_part = part;
-			
-			
+
+
 			partition = "u"+part;
 			Vector<File> vf = new Vector<File>();
 			for (String input_rank : input_rankings){
@@ -532,7 +532,7 @@ public class GPRA_Principal {
 					dados = new InputData(plain_train, usermap, base, test, validacao, numItemsToUse, numItemsToSuggest,p_args.getBoolean("use_sparse"));
 				else
 					dados = new InputData(vf, base, validacao,test,usermap,numItemsToUse,numItemsToSuggest); //read data and usermap
-				
+
 				//dados.read_user_categories(new File(base_dir+"matrix_user_cat_"+partition+".base"));
 				//dados.read_item_categories(new File(base_dir+"matrix_item_cat"));
 				//dados.calc_item_categories_scores(new File(base_dir+"matrix_item_cat"));
@@ -549,7 +549,7 @@ public class GPRA_Principal {
 				u.addAlternativeRanking(new Vector<Integer>(CombMethods.CombMNZ(u).subList(0, numItemsToUse)));
 				u.addAlternativeRanking(new Vector<Integer>(CombMethods.BordaCount(u).subList(0, numItemsToUse)));
 				//u.addAlternativeRanking(new Vector<Integer>(Outrank.competitionTable(u).subList(0, numItemsToUse)));
-				
+
 				//u.addAlternativeRanking(new Vector<Integer>(
 				//		CombMethods.outrank_approach(
 				//				u,numItemsToUse,dados.getNumRankings()).subList(0, numItemsToUse)));
@@ -559,15 +559,15 @@ public class GPRA_Principal {
 			//PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("Log_"+"r"+i+"_r"+j+partition+".data")));
 			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(p_args.getString("out_dir")+partition+"_baselines"+".log")));
 
-			int iri = 0; 
+			int iri = 0;
 			for (String input_rank : input_rankings){
 				out.write("MAP "+iri+" : "+input_rank+"\n");
 				iri++;
-			} 
+			}
 
 			UtilStatistics.printMAP(dados, numItemsToUse, numItemsToSuggest, false, out);
 			UtilStatistics.printMAP(dados, numItemsToUse, numItemsToSuggest, true, out);
-			
+
 			for (User u : usuarios){
 				u.freeOriginalRankings();
 			}
@@ -579,7 +579,7 @@ public class GPRA_Principal {
 
 			out.close();
 
-			
+
 			//READ THE DATA TO REEVALUATE THE BEST INDIVIDUAL
 			Set<String> reeval_rankings = new HashSet<String>();
 
@@ -590,7 +590,7 @@ public class GPRA_Principal {
 				if (listOfFiles_reeval[i].isFile() && listOfFiles_reeval[i].getName().contains(".out") ) {
 					String rank_name = listOfFiles_reeval[i].getName().substring(3);
 					reeval_rankings.add(rank_name);
-				} 
+				}
 			}
 
 			Vector<File> vf_reeval = new Vector<File>();
@@ -608,7 +608,7 @@ public class GPRA_Principal {
 				test_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".test");
 				usermap_reeval = new File(p_args.getString("base_dir")+"reeval/"+partition+".train.map");
 				dados_reeval = new InputData(train_reeval, usermap_reeval, base_reeval, test_reeval, test_reeval, numItemsToUse, numItemsToSuggest,p_args.getBoolean("use_sparse"));
-			}else{				
+			}else{
 				dados_reeval = new InputData(vf_reeval,base_reeval, test_reeval,test_reeval, usermap_reeval,numItemsToUse,numItemsToSuggest);
 			}
 			Vector<User> usuarios_reeval = dados_reeval.getUsers();
@@ -637,13 +637,13 @@ public class GPRA_Principal {
 			 */
 
 			//CombMethods.outrank_approach(usuarios.firstElement());
-			
-			
+
+
 			//Utils.save_alternative_ranking(usuarios_reeval,out_dir, partition);
 
-			
+
 			Utils.save_alternative_ranking(usuarios_reeval,p_args.getString("out_dir"), partition);
-			
+
 			PrintWriter out_reeval = new PrintWriter(new BufferedWriter(new FileWriter(p_args.getString("out_dir")+partition+"baselines"+"_reeval.log")));
 			//UtilStatistics.printMAP(dados_reeval, numItemsToUse, numItemsToSuggest, false, out)
 			UtilStatistics.printMAP(dados_reeval, numItemsToUse, numItemsToSuggest, true, out_reeval);
@@ -654,18 +654,18 @@ public class GPRA_Principal {
 			ParameterDatabase parameters = null;
 			if (runGP)
 			{
-				
+
 				File param_file;
 				if (p_args.getBoolean("use_plain"))
 					param_file = new File(p_args.getString("param")+".basic");
-				else	
+				else
 					param_file = new File(p_args.getString("param"));
-				
+
 				parameters = new ParameterDatabase(param_file);
-				
+
 				System.out.println("Start GP");
 
-				//URL fileURL = GPRA_Principal.class.getResource("./params/gpra.params"); 
+				//URL fileURL = GPRA_Principal.class.getResource("./params/gpra.params");
 
 				//ParameterDatabase parameters = new ParameterDatabase(param_file,new String[] {" -file", param_file.getCanonicalPath()});
 				//System.out.println(parameters.getLong(new Parameter("seed.0"),null));
@@ -697,25 +697,30 @@ public class GPRA_Principal {
 				parameters.set(new Parameter("gp.koza.xover.maxdepth"), ""+p_args.getInt("tree_size"));
 				parameters.set(new Parameter("gp.koza.mutate.maxdepth"), ""+p_args.getInt("tree_size"));
 
+				parameters.set(new Parameter("linear_multiobj"), p_args.getBoolean("linear_multiobj").toString());
+
+                parameters.set(new Parameter("novelty_coef"), p_args.getDouble("novelty_coef").toString());
+                parameters.set(new Parameter("diversity_coef"), p_args.getDouble("diversity_coef").toString());
+
 				//parametros criados por mim em tempo de execucao
-				
+
 				if (use_niching == 1)
 					parameters.set(new Parameter("gpra.niching.fitness_tshare"),""+tshare);
 				else
 					if (use_niching == 2)
 						parameters.set(new Parameter("gpra.niching.pheno_tshare"),""+tshare);
 
-				
-				
-				
+
+
+
 				if (p_args.getBoolean("use_plain")){
 					int num_functions = parameters.getInt(new Parameter("gp.fs.0.size"),new Parameter("gp.fs.0.size"));
-					
-					
-					List<Integer> used_atts = p_args.getList("used_atts");					
-					//ArrayList<Integer> used_atts =  new ArrayList<Integer>();					
-					for (int att_num = 0; att_num < used_atts.size(); att_num++){ 
-						parameters.set(new Parameter("gp.fs.0.func."+(num_functions+att_num)), 
+
+
+					List<Integer> used_atts = p_args.getList("used_atts");
+					//ArrayList<Integer> used_atts =  new ArrayList<Integer>();
+					for (int att_num = 0; att_num < used_atts.size(); att_num++){
+						parameters.set(new Parameter("gp.fs.0.func."+(num_functions+att_num)),
 							"ec.app.gpra.terminals.GenericAtt"+used_atts.get(att_num));
 						parameters.set(new Parameter("gp.fs.0.func."+(num_functions+att_num)+".nc"),"nc0");
 					}
@@ -730,20 +735,20 @@ public class GPRA_Principal {
 					}
 					parameters.set(new Parameter("gp.fs.0.size"),""+(num_functions+num_used_att));*/
 				}
-				
-				
+
+
 				//Quer dizer que existem mais classe Score do que rankings.
 				//Pra isso é preciso que as classes scores estejam nas primeiras posicoes
 				//TODO
 				//if (parameters.containsKey("gp.fs.0.func."+numUsedRanks)){
-					 
+
 				//}
-				
+
 				for (int run = init_run; run < nruns; run++)
 				{
 					curr_run = run;
 					long time = System.currentTimeMillis();
-					
+
 					for (int nseed=0; nseed<nthreads; nseed++){
 						parameters.set(new Parameter("seed."+nseed), ""+seeds[nseed][run]);
 					}
@@ -786,7 +791,7 @@ public class GPRA_Principal {
 
 					outGP.print("\n\nTotal Time(s): " + time/1000, 2);
 
-					Individual[] best_inds; 
+					Individual[] best_inds;
 					best_inds =  ((SimpleStatistics)(evaluatedState.statistics)).getBestSoFar();
 
 
@@ -796,7 +801,7 @@ public class GPRA_Principal {
 						best_inds_dir.mkdir();
 
 					OutputStream out_stream_bestind = new FileOutputStream(best_inds_dir.toString()+"/u"+part+".run"+run+".bestind");			    				DataOutputStream data_out_stream = new DataOutputStream(out_stream_bestind);
-					best_inds[0].writeIndividual(evaluatedState, data_out_stream);			    
+					best_inds[0].writeIndividual(evaluatedState, data_out_stream);
 					data_out_stream.close();
 
 					//**************************************end**********************************************
@@ -808,7 +813,7 @@ public class GPRA_Principal {
 						backup_individual(best_individuals_by_run, best_inds[0], run);
 						backup_individual(best_individuals_by_part, best_inds[0], part-1);
 					}
-					//dados.Usuarios = null;	
+					//dados.Usuarios = null;
 
 					Evolve.cleanup(evaluatedState);
 
@@ -835,14 +840,14 @@ public class GPRA_Principal {
 
 					((ec.Problem)problem).prepareToEvaluate(evolution_state_reeval,0);
 					((GPRA_Problem)problem).set_data(dados_reeval);
-					((GPRA_Problem)problem).set_save_ranking(true);  
+					((GPRA_Problem)problem).set_save_ranking(true);
 
 					//*******************End Initialize Evolution State******************************
 
 
 					((ec.Problem)problem).prepareToEvaluate(evaluatedState,0);
 					((GPRA_Problem)problem).set_data(dados_reeval);
-					((GPRA_Problem)problem).set_save_ranking(true);      
+					((GPRA_Problem)problem).set_save_ranking(true);
 
 					Individual[] inds = best_inds;
 					for (int xi = 0; xi < inds.length; xi++){
@@ -884,7 +889,7 @@ public class GPRA_Principal {
 
 		}
 		total_time2 = System.currentTimeMillis() - total_time2;
-		
+
 		System.out.println("Total Time: "+total_time2);
 	}
 	//}
