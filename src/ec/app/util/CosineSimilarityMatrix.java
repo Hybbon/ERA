@@ -72,8 +72,8 @@ public class CosineSimilarityMatrix {
     public CosineSimilarityMatrix(Map<Integer, Vector<Integer>> likedItemsByUser) {
         Map<Integer, Vector<Integer>> likersByItem = computeLikers(likedItemsByUser);
 
-        int numUsers = likedItemsByUser.size();
-        mMatrix = new DenseMatrix(numUsers, numUsers);
+        int numItems = likersByItem.size();
+        mMatrix = new DenseMatrix(numItems, numItems);
         mIndexByItemId = new HashMap<>();
 
         int i = 0;

@@ -38,4 +38,19 @@ public class testCosineSimilarityMatrix {
 
         Assert.assertEquals(0., m.get(1, 2), 0.000001);
     }
+
+    @Test
+    public void testWithMoreItemsThanUsers() {
+        Map<Integer, Vector<Integer>> likedItemsByUser = new HashMap<>();
+
+        Vector<Integer> likedByUser1 = new Vector<>();
+        likedByUser1.add(1);
+        likedByUser1.add(2);
+        likedItemsByUser.put(1, likedByUser1);
+        CosineSimilarityMatrix m = new CosineSimilarityMatrix(likedItemsByUser);
+        Assert.assertEquals(1., m.get(1, 1), 0.000001);
+        Assert.assertEquals(1., m.get(1, 2), 0.000001);
+        Assert.assertEquals(1., m.get(2, 1), 0.000001);
+        Assert.assertEquals(1., m.get(2, 2), 0.000001);
+    }
 }
