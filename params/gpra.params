@@ -16,7 +16,7 @@ pop.subpop.0.size = 10
 #breedthreads = 4
 #evalthreads = 4
 
-breed.elite.0 = 2
+# breed.elite.0 = 2
 #seed.0 = 123
 #seed.1 = -13123
 #seed.2 = 54123
@@ -32,11 +32,15 @@ breed.elite.0 = 2
 #
 
 # Reproduction will use Tournament Selection 
-breed.reproduce.source.0 = ec.select.TournamentSelection
+# breed.reproduce.source.0 = ec.select.TournamentSelection
+breed.reproduce.source.0 = ec.multiobjective.spea2.SPEA2TournamentSelection
 
 # Crossover will use Tournament Selection, try only 1
 # time, have a max depth of 17, and use KozaNodeSelector
-gp.koza.xover.source.0 = ec.select.TournamentSelection
+
+# gp.koza.xover.source.0 = ec.select.TournamentSelection
+gp.koza.xover.source.0 = ec.multiobjective.spea2.SPEA2TournamentSelection
+
 gp.koza.xover.source.1 = same
 gp.koza.xover.ns.0 = ec.gp.koza.KozaNodeSelector
 gp.koza.xover.ns.1 = same
@@ -166,3 +170,21 @@ eval.problem.data = ec.app.gpra.DoubleData
 state = ec.app.gpra.MySimpleEvolutionState
 pop.subpop.0.species.ind = ec.app.gpra.MyIndividual
 
+
+# how many objectives should we have by default?
+# you can also assign this on a per-subpopulation basis
+multi.fitness.num-objectives 	= 3
+
+# max and min values of all each objective function
+multi.fitness.max 		= 1
+multi.fitness.min 		= 0
+
+
+breed.elite.0 =	3
+
+# We also use a special version of MultiObjectiveFitness
+pop.subpop.0.species.fitness =				ec.multiobjective.spea2.SPEA2MultiObjectiveFitness
+
+# We have our own evaluator and breeder
+eval =						ec.multiobjective.spea2.SPEA2Evaluator
+breed =						ec.multiobjective.spea2.SPEA2Breeder

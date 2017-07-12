@@ -166,6 +166,13 @@ public class ParameterParser {
 				.help("Enables multi-objective evolution based on linear combination of multiple fitness functions");
 
 
+		parser.addArgument("--spea_multiobj")
+				.type(Boolean.class)
+				.setDefault(false)
+				.action(storeTrue())
+				.help("Enables multi-objective evolution based on linear combination of multiple fitness functions");
+
+
         parser.addArgument("--novelty_coef")
                 .type(Double.class)
                 .setDefault(0.33)

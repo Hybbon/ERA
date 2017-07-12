@@ -61,7 +61,7 @@ public class MyStatistics {
 		MyIndividual bestInd = null;
 		
 		for(int i  = 0; i < subpopSize; i++){
-			
+
 			MyIndividual myind = (MyIndividual) subpop.individuals[i];
 			//################################################
 			//retrieve the couting o terminals
@@ -85,51 +85,10 @@ public class MyStatistics {
 			}*/
 		
 			//######################################################
-		
-			if(bestFit > ((KozaFitness)subpop.individuals[i].fitness).standardizedFitness()){
-				bestFit = ((KozaFitness)subpop.individuals[i].fitness).standardizedFitness();
-				bestFitTest = ((MyIndividual)subpop.individuals[i]).getTestFitness();
-				bestInd = myind;
-				
-			}
-			
-			if(bestHits_x < ((MyIndividual)subpop.individuals[i]).getValidationHits()){
-				bestHits_x = ((MyIndividual)subpop.individuals[i]).getValidationHits();
-			}
-			
-			
-			if(bestHits_use_x < ((MyIndividual)subpop.individuals[i]).getValidationHits_use()){
-				bestHits_use_x = ((MyIndividual)subpop.individuals[i]).getValidationHits_use();
-			}
-			/*
-			//TODO alterar para pegar o fitness correspondendo ao bestFitVal
-			if(bestFitTest > ((MyIndividual)subpop.individuals[i]).getTestFitness())
-				bestFitTest = ((MyIndividual)subpop.individuals[i]).getTestFitness();
-			*/
-			
-			avgFit += ((KozaFitness)subpop.individuals[i].fitness).standardizedFitness();
-			
-			avgFitVal += ((MyIndividual)subpop.individuals[i]).getValidationFitness();
-			avgFitTest += ((MyIndividual)subpop.individuals[i]).getTestFitness();
-			
+
+
+
 		}
-		avgFit /= subpopSize;
-		avgFitVal /= subpopSize;
-		avgFitTest /= subpopSize;
-		
-		averageFitness = avgFit;
-		averageFitnessVal = avgFitVal;
-		averageFitnessTest = avgFitTest;
-		
-		bestFitnessVal = bestFit;
-		bestFitnessTest = bestFitTest;
-		
-		bestHits = bestHits_x;
-		bestHits_use = bestHits_use_x;
-		prec_5 = bestInd.getPrec_5();
-		prec_10 = bestInd.getPrec_10();
-		map_5 = bestInd.getMap_5();
-		map_10 = bestInd.getMap_10();
 	}
 	
 	
@@ -137,23 +96,7 @@ public class MyStatistics {
 	public String toString(){
 		
 		String s = "";
-		s += "Terminals: " + popTerminalsCount.toString() + "\n";
-		s += "Average Fitness: " + averageFitness + "\n";
-		s += "Average Fitness Validation: " + averageFitnessVal + "\n";
-		s += "Average Fitness Test: " + averageFitnessTest + "\n";
-		s += "Best Fitness Validation: " + bestFitnessVal + "\n";
-		s += "Best Hits: " + bestHits + "\n";
-		s += "Best Hits_use: " + bestHits_use + "\n";
-		s += "Best Fitness Test: " + bestFitnessTest + "\n";
-		s += "Best prec@5 Test: "  + prec_5[0] +"\n";
-		s += "Best prec@10 Test: "  + prec_10[0] +"\n";
-		s += "Best prec@5 Val: "  + prec_5[1] +"\n";
-		s += "Best prec@10 Val: "  + prec_10[1] +"\n";
-		s += "Best map@5 Test: "  + map_5[0] +"\n";
-		s += "Best map@10 Test: "  + map_10[0] +"\n";
-		s += "Best map@5 Val: "  + map_5[1] +"\n";
-		s += "Best map@10 Val: "  + map_10[1] +"\n";
-		
+
 		return s;
 		
 		

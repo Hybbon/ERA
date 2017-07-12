@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Vector;
 
+import ec.multiobjective.MultiObjectiveFitness;
 import ec.util.*;
 import ec.*;
 import ec.app.data.InputData;
@@ -53,6 +54,8 @@ public class GPRA_Problem extends GPProblem implements
     private double eild_fitness_weight;
     private double map_fitness_weight;
 
+    private boolean speaMultiObj;
+
 	public void setup(final EvolutionState state, final Parameter base) {
 		
 		
@@ -72,6 +75,7 @@ public class GPRA_Problem extends GPProblem implements
 					+ DoubleData.class, base.push(P_DATA), null);
 
 		linearMultiObj = state.parameters.getBoolean(new Parameter("linear_multiobj"), null, false);
+        speaMultiObj = state.parameters.getBoolean(new Parameter("spea_multiobj"), null, false);
 
         epc_fitness_weight = state.parameters.getDouble(new Parameter("novelty_coef"), null);
         eild_fitness_weight = state.parameters.getDouble(new Parameter("diversity_coef"), null);
@@ -307,7 +311,7 @@ public class GPRA_Problem extends GPProblem implements
 				prec_test += prec_test_aux;
 				prec_val += prec_val_aux;
 
-				if (linearMultiObj) {
+				if (linearMultiObj || speaMultiObj) {
                     double epc_test_aux = Metrics.epc(testRanking, dados.popularityByItem, numItemsToSuggest);
                     double epc_val_aux = Metrics.epc(validationRanking, dados.popularityByItem, numItemsToSuggest);
 
@@ -365,12 +369,18 @@ public class GPRA_Problem extends GPProblem implements
 			double val_fitness;
             double test_fitness;
 
-			if (linearMultiObj) {
-                double mean_epc_test = epc_test/dados.getNumUsersTestHasElem();
-                double mean_epc_val = epc_val/dados.getNumUsersValHasElem();
+            double mean_epc_test;
+            double mean_epc_val = 0;
 
-                double mean_eild_test = eild_test/dados.getNumUsersTestHasElem();
-                double mean_eild_val = eild_val/dados.getNumUsersValHasElem();
+            double mean_eild_test;
+            double mean_eild_val = 0;
+
+			if (linearMultiObj || speaMultiObj) {
+                mean_epc_test = epc_test/dados.getNumUsersTestHasElem();
+                mean_epc_val = epc_val/dados.getNumUsersValHasElem();
+
+                mean_eild_test = eild_test/dados.getNumUsersTestHasElem();
+                mean_eild_val = eild_val/dados.getNumUsersValHasElem();
 
 
                 val_fitness = map_val * map_fitness_weight +
@@ -386,18 +396,30 @@ public class GPRA_Problem extends GPProblem implements
             }
 
 			// the fitness better be KozaFitness!
-			KozaFitness f = ((KozaFitness) ind.fitness);
-			//f.setFitness(state, map,false); //set the fitness but say it is not ideal
 
-			f.setStandardizedFitness(state, 1 - val_fitness);
+            if (speaMultiObj) {
+                MultiObjectiveFitness f = (MultiObjectiveFitness) ind.fitness;
+                double[] objectives = f.getObjectives();
+
+                objectives[0] = map_val;
+                objectives[1] = mean_epc_val;
+                objectives[2] = mean_eild_val;
+
+
+            } else {
+                KozaFitness f = ((KozaFitness) ind.fitness);
+                //f.setFitness(state, map,false); //set the fitness but say it is not ideal
+
+                f.setStandardizedFitness(state, 1 - val_fitness);
+                f.hits = Math.round(mean_hits_sug/dados.getNumUsersValHasElem());
+            }
+
 			((MyIndividual)ind).setTestFitness(1 - test_fitness);
 			((MyIndividual)ind).setValidationFitness(1 - val_fitness);
 			
 			((MyIndividual)ind).setValidationHits(mean_hits_sug/dados.getNumUsersValHasElem());
 			((MyIndividual)ind).setValidationHits_use(mean_hits_use/dados.getNumUsersValHasElem());
-			
-			
-			f.hits = Math.round(mean_hits_sug/dados.getNumUsersValHasElem());
+
 			ind.evaluated = true;
 			 //System.out.println("Individual " + ind);
 			 //System.out.println("Fitness: " + f);

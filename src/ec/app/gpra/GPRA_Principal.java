@@ -702,6 +702,8 @@ public class GPRA_Principal {
                 parameters.set(new Parameter("novelty_coef"), p_args.getDouble("novelty_coef").toString());
                 parameters.set(new Parameter("diversity_coef"), p_args.getDouble("diversity_coef").toString());
 
+				parameters.set(new Parameter("spea_multiobj"), p_args.getBoolean("spea_multiobj").toString());
+
 				//parametros criados por mim em tempo de execucao
 
 				if (use_niching == 1)
@@ -800,7 +802,8 @@ public class GPRA_Principal {
 					if (!best_inds_dir.exists())
 						best_inds_dir.mkdir();
 
-					OutputStream out_stream_bestind = new FileOutputStream(best_inds_dir.toString()+"/u"+part+".run"+run+".bestind");			    				DataOutputStream data_out_stream = new DataOutputStream(out_stream_bestind);
+					OutputStream out_stream_bestind = new FileOutputStream(best_inds_dir.toString()+"/u"+part+".run"+run+".bestind");
+					DataOutputStream data_out_stream = new DataOutputStream(out_stream_bestind);
 					best_inds[0].writeIndividual(evaluatedState, data_out_stream);
 					data_out_stream.close();
 
@@ -858,8 +861,6 @@ public class GPRA_Principal {
 					((ec.Problem)problem).finishEvaluating(evaluatedState,0);
 
 					out_reeval.write("Best Individual"+"\n");
-					double fit = 1-((KozaFitness)inds[0].fitness).standardizedFitness();
-					out_reeval.write(fit+"\n");
 
 					System.out.println("BEST INDIVIDUAL RESULT");
 					System.out.println(inds[0].fitness.fitness());

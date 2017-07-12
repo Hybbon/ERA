@@ -125,25 +125,25 @@ public class MySimpleEvolutionState extends ec.simple.SimpleEvolutionState{
 				statistics.preBreedingStatistics(this);
 
 				//Fitness Sharing
-				Vector<Vector<MyIndividual>> niches = count_individuals_with_equal_fitness();
-				use_niching = GPRA_Principal.get_use_niching();
-				if (use_niching == 1){
-					//fitness_sharing(niches);
-					double theta_share = parameters.getDouble(new Parameter("gpra.niching.fitness_tshare"),new Parameter("gpra.niching.tshare"),0);
-					fitness_sharing(use_niching,theta_share, 1.0);
-
-				}
-				else
-				{
-					if (use_niching == 2){
-						double theta_share = parameters.getDouble(new Parameter("gpra.niching.pheno_tshare"),new Parameter("gpra.niching.tshare"),0);
-						fitness_sharing(use_niching,theta_share, 1.0);
-					}
-				}
-				//TODO salvar actual fitness
-				for (int n = 0 ; n < niches.size(); n++){
-					niches_str += niches.get(n).size()+",";
-				}
+//				Vector<Vector<MyIndividual>> niches = count_individuals_with_equal_fitness();
+//				use_niching = GPRA_Principal.get_use_niching();
+//				if (use_niching == 1){
+//					//fitness_sharing(niches);
+//					double theta_share = parameters.getDouble(new Parameter("gpra.niching.fitness_tshare"),new Parameter("gpra.niching.tshare"),0);
+//					fitness_sharing(use_niching,theta_share, 1.0);
+//
+//				}
+//				else
+//				{
+//					if (use_niching == 2){
+//						double theta_share = parameters.getDouble(new Parameter("gpra.niching.pheno_tshare"),new Parameter("gpra.niching.tshare"),0);
+//						fitness_sharing(use_niching,theta_share, 1.0);
+//					}
+//				}
+//				//TODO salvar actual fitness
+//				for (int n = 0 ; n < niches.size(); n++){
+//					niches_str += niches.get(n).size()+",";
+//				}
 				//alternativeOutWritter.write(niches_str+"\n");
 				alternativeOutWritter.write("\n");
 
