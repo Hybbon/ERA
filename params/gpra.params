@@ -180,7 +180,8 @@ multi.fitness.max 		= 1
 multi.fitness.min 		= 0
 
 
-breed.elite.0 =	3
+# breed.elite.0 =	10
+# Archive size is being set as 20% of number of individuals
 
 # We also use a special version of MultiObjectiveFitness
 pop.subpop.0.species.fitness =				ec.multiobjective.spea2.SPEA2MultiObjectiveFitness

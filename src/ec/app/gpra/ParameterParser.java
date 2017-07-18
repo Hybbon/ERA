@@ -159,31 +159,6 @@ public class ParameterParser {
 				.help("Position of the used attributes in the plain dataset");
 
 
-		parser.addArgument("--linear_multiobj")
-				.type(Boolean.class)
-				.setDefault(false)
-				.action(storeTrue())
-				.help("Enables multi-objective evolution based on linear combination of multiple fitness functions");
-
-
-		parser.addArgument("--spea_multiobj")
-				.type(Boolean.class)
-				.setDefault(false)
-				.action(storeTrue())
-				.help("Enables multi-objective evolution based on linear combination of multiple fitness functions");
-
-
-        parser.addArgument("--novelty_coef")
-                .type(Double.class)
-                .setDefault(0.33)
-                .help("Novelty coefficient for linear coefficient-based multi-objective evolution.");
-
-        parser.addArgument("--diversity_coef")
-                .type(Double.class)
-                .setDefault(0.33)
-                .help("Diversity coefficient for linear coefficient-based multi-objective evolution.");
-
-
         try {
             ns = parser.parseArgs(args);
         } catch (ArgumentParserException e) {

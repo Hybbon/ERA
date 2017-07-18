@@ -49,13 +49,6 @@ public class GPRA_Problem extends GPProblem implements
 	public int timesOnRankings = 0;
 	public double outrank_score = 0;
 
-	private boolean linearMultiObj;
-	private double epc_fitness_weight;
-    private double eild_fitness_weight;
-    private double map_fitness_weight;
-
-    private boolean speaMultiObj;
-
 	public void setup(final EvolutionState state, final Parameter base) {
 		
 		
@@ -73,13 +66,6 @@ public class GPRA_Problem extends GPProblem implements
 		if (!(input instanceof DoubleData))
 			state.output.fatal("GPData class must subclass from "
 					+ DoubleData.class, base.push(P_DATA), null);
-
-		linearMultiObj = state.parameters.getBoolean(new Parameter("linear_multiobj"), null, false);
-        speaMultiObj = state.parameters.getBoolean(new Parameter("spea_multiobj"), null, false);
-
-        epc_fitness_weight = state.parameters.getDouble(new Parameter("novelty_coef"), null);
-        eild_fitness_weight = state.parameters.getDouble(new Parameter("diversity_coef"), null);
-        map_fitness_weight = 1. - epc_fitness_weight - eild_fitness_weight;
     }
 	
 	public void set_data(InputData new_data){
@@ -311,118 +297,44 @@ public class GPRA_Problem extends GPProblem implements
 				prec_test += prec_test_aux;
 				prec_val += prec_val_aux;
 
-				if (linearMultiObj || speaMultiObj) {
-                    double epc_test_aux = Metrics.epc(testRanking, dados.popularityByItem, numItemsToSuggest);
-                    double epc_val_aux = Metrics.epc(validationRanking, dados.popularityByItem, numItemsToSuggest);
+                double epc_test_aux = Metrics.epc(testRanking, dados.popularityByItem, numItemsToSuggest);
+                double epc_val_aux = Metrics.epc(validationRanking, dados.popularityByItem, numItemsToSuggest);
 
-                    double eild_test_aux = Metrics.eild(testRanking, dados.similarityMatrix, numItemsToSuggest);
-                    double eild_val_aux = Metrics.eild(validationRanking, dados.similarityMatrix, numItemsToSuggest);
+                double eild_test_aux = Metrics.eild(testRanking, dados.similarityMatrix, numItemsToSuggest);
+                double eild_val_aux = Metrics.eild(validationRanking, dados.similarityMatrix, numItemsToSuggest);
 
-                    epc_test += epc_test_aux;
-                    epc_val += epc_val_aux;
+                epc_test += epc_test_aux;
+                epc_val += epc_val_aux;
 
-                    eild_test += eild_test_aux;
-                    eild_val += eild_val_aux;
-                }
-
-				//*************************LOG******************
-				/*
-				prec_5_t += Metrics.precision_at(users.get(user_pos).getTestRanking(), saida_items,5);
-				prec_5_v += Metrics.precision_at(users.get(user_pos).getValidationRanking(), saida_items,5);
-				prec_10_t += Metrics.precision_at(users.get(user_pos).getTestRanking(), saida_items,10);
-				prec_10_v += Metrics.precision_at(users.get(user_pos).getValidationRanking(), saida_items,10);
-				
-				map_5_t += Metrics.precision(users.get(user_pos).getTestRanking(), saida_items,5);
-				map_5_v += Metrics.precision(users.get(user_pos).getValidationRanking(), saida_items,5);
-				map_10_t += Metrics.precision(users.get(user_pos).getTestRanking(), saida_items,10);
-				map_10_v += Metrics.precision(users.get(user_pos).getValidationRanking(), saida_items,10);
-				*/
-				//*************************END LOG ********************************************
+                eild_test += eild_test_aux;
+                eild_val += eild_val_aux;
 			}
-			//long siz = ind.size();
-			//***************************LOG******************************
-			/*prec_5_t /= dados.getNumUsersTestHasElem();
-			prec_5_v /= dados.getNumUsersValHasElem();
-			prec_10_t /= dados.getNumUsersTestHasElem();
-			prec_10_v /= dados.getNumUsersTestHasElem();
-			
-			map_5_t /= dados.getNumUsersTestHasElem();
-			map_5_v /= dados.getNumUsersTestHasElem();
-			map_10_t /= dados.getNumUsersTestHasElem();
-			map_10_v /= dados.getNumUsersTestHasElem();
-			*/
+
 			((MyIndividual)ind).setPrec_5(new double[] {prec_5_t,prec_5_v});
 			((MyIndividual)ind).setPrec_10(new double[] {prec_10_t,prec_10_v});
 			((MyIndividual)ind).setMap_5(new double[] {map_5_t,map_5_v});
 			((MyIndividual)ind).setMap_10(new double[] {map_10_t,map_10_v});
 			//****************************END LOG ***********************
 			
-			
-			
 			//TODO dados.getNumUsersTestHasElem(); retorna o numero de usuarios no arquivo de teste
 			//contudo, pode ser que um usuario esteja no teste mas não nos rankings de entrada
 			//na ML1M isso acontece com o user 5850
 
-			double map_test = prec_test/dados.getNumUsersTestHasElem();
 			double map_val = prec_val/dados.getNumUsersValHasElem();
+            double mean_epc_val = epc_val/dados.getNumUsersValHasElem();
+            double mean_eild_val = eild_val/dados.getNumUsersValHasElem();
 
-			double val_fitness;
-            double test_fitness;
+            MultiObjectiveFitness f = (MultiObjectiveFitness) ind.fitness;
+            double[] objectives = f.getObjectives();
 
-            double mean_epc_test;
-            double mean_epc_val = 0;
+            objectives[0] = map_val;
+            objectives[1] = mean_epc_val;
+            objectives[2] = mean_eild_val;
 
-            double mean_eild_test;
-            double mean_eild_val = 0;
-
-			if (linearMultiObj || speaMultiObj) {
-                mean_epc_test = epc_test/dados.getNumUsersTestHasElem();
-                mean_epc_val = epc_val/dados.getNumUsersValHasElem();
-
-                mean_eild_test = eild_test/dados.getNumUsersTestHasElem();
-                mean_eild_val = eild_val/dados.getNumUsersValHasElem();
-
-
-                val_fitness = map_val * map_fitness_weight +
-                        mean_epc_val * epc_fitness_weight +
-                        mean_eild_val * eild_fitness_weight;
-
-                test_fitness = map_test * map_fitness_weight +
-                        mean_epc_test * epc_fitness_weight +
-                        mean_eild_test * eild_fitness_weight;
-            } else {
-                val_fitness = map_val;
-                test_fitness = map_test;
-            }
-
-			// the fitness better be KozaFitness!
-
-            if (speaMultiObj) {
-                MultiObjectiveFitness f = (MultiObjectiveFitness) ind.fitness;
-                double[] objectives = f.getObjectives();
-
-                objectives[0] = map_val;
-                objectives[1] = mean_epc_val;
-                objectives[2] = mean_eild_val;
-
-
-            } else {
-                KozaFitness f = ((KozaFitness) ind.fitness);
-                //f.setFitness(state, map,false); //set the fitness but say it is not ideal
-
-                f.setStandardizedFitness(state, 1 - val_fitness);
-                f.hits = Math.round(mean_hits_sug/dados.getNumUsersValHasElem());
-            }
-
-			((MyIndividual)ind).setTestFitness(1 - test_fitness);
-			((MyIndividual)ind).setValidationFitness(1 - val_fitness);
-			
 			((MyIndividual)ind).setValidationHits(mean_hits_sug/dados.getNumUsersValHasElem());
 			((MyIndividual)ind).setValidationHits_use(mean_hits_use/dados.getNumUsersValHasElem());
 
 			ind.evaluated = true;
-			 //System.out.println("Individual " + ind);
-			 //System.out.println("Fitness: " + f);
 		}
 	}
 	

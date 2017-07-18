@@ -31,13 +31,9 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Vector;
 
+import ec.*;
+import ec.simple.SimpleBreeder;
 import net.sourceforge.argparse4j.inf.Namespace;
-import ec.Evaluator;
-import ec.EvolutionState;
-import ec.Evolve;
-import ec.Individual;
-import ec.Species;
-import ec.Subpopulation;
 import ec.app.data.InputData;
 import ec.app.data.Item;
 import ec.app.data.User;
@@ -313,145 +309,7 @@ public class GPRA_Principal {
 	}
 
 	public static void main(String args[]) throws IOException, URISyntaxException{
-
-		//TODO create a parameter class
-		String partition= "";
-		/*//String base_dir = "/home/samuel/workspace/GP_RankingAggregation/rankings/20151202/ml-100k/";
-		String base_dir = "/home/samuel/workspace/Gen_dataset_GPRA/ml100k_plain/";
-		boolean use_plain = false;
-		boolean use_sparse = false;
-		//int num_used_att = 13;
-		Vector<Integer> used_atts = null; 
-		String out_dir = "test_ml100k_test_runs/";
-		String partition = "u1";
-		String param_file_path = "./params/gpra.params";
-		int numGenerations = 50;
-		int numIndividuals = 25;
-		int maxIterWithoutImprove = 50;
-		int maxTreeSize = 10;
-		int tournament_size = 7;
-		int pini = 1, pend = 5;
-		double mutationProb = 0.25;
-		double xoverProb = 0.65;	
-		double reproductionProb = 0.10;
-		use_outrank = true;
-
-		for(int ar = 0; ar < args.length; ar++){
-			//System.out.println(args[ar]);
-			String param = args[ar];
-			if (param.startsWith("-")){
-				String x[] = args[ar].split("=");
-				String attr = args[ar].split("=")[0].substring(1); //pega o nome do parametro ignorando o -
-				switch(attr){
-
-				case "base_dir":
-					base_dir = args[ar].split("=")[1];
-					break;
-				case "out_dir":
-					out_dir = args[ar].split("=")[1];					
-					break;
-				case "base": 
-					partition = args[ar].split("=")[1];
-					break;
-				case "numg":
-					numGenerations = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "numi":
-					numIndividuals = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "tshare":
-					tshare = Double.parseDouble(args[ar].split("=")[1]);
-					break;	
-				case "mut":
-					mutationProb = Double.parseDouble(args[ar].split("=")[1]);
-					break;
-				case "xover":
-					xoverProb = Double.parseDouble(args[ar].split("=")[1]);
-					break;
-				case "rep":
-					reproductionProb = Double.parseDouble(args[ar].split("=")[1]);
-					break;
-				case "stop":
-					maxIterWithoutImprove = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "tree_size":
-					maxTreeSize = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "init_run":
-					init_run = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "i2use":
-					numItemsToUse = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "i2sug":
-					numItemsToSuggest = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "pini":
-					pini = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "pend":
-					pend = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "outrank":
-					use_outrank = Boolean.parseBoolean(args[ar].split("=")[1]);
-					break;
-				case "bkp":
-					need_backup = Boolean.parseBoolean(args[ar].split("=")[1]);
-					break;
-				case "K":
-					tournament_size = Integer.parseInt(args[ar].split("=")[1]);					
-					break;
-				case "nruns":
-					nruns = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "nthreads":
-					nthreads = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "noGP":
-					runGP = false;
-					break;
-				case "use_sparse":
-					use_sparse = true	;
-					break;
-				case "param":
-					param_file_path = args[ar].split("=")[1];
-					break;
-				case "nich":
-					use_niching = Integer.parseInt(args[ar].split("=")[1]);
-					break;
-				case "use_plain":
-					use_plain = true;
-					break;					
-				case "used_atts":
-					String[] used_atts_aux = args[ar].split("=")[1].split(",");					
-									
-					used_atts = new Vector<Integer>();
-					for(int i = 0; i < used_atts_aux.length; i++)
-						if  (!used_atts_aux[i].contains("-"))
-							used_atts.add(Integer.parseInt(used_atts_aux[i]));
-						else{
-							String[] start_end = used_atts_aux[i].split("-"); 
-						
-							for (int j = Integer.parseInt(start_end[0]); 
-									j <= Integer.parseInt(start_end[1]); j++){
-								
-								used_atts.add(j);
-							}
-								
-						}
-					
-					break;
-					
-				default:
-					System.err.println("Param "+ attr + "doesn't exist");
-					System.err.println("Parameters: base, numg, numi, mut, xover, rep, stop, tree_size");
-					return;
-				}
-
-
-			}
-		}
-		*/
+		String partition;
 
 		Namespace p_args = ParameterParser.parse_arguments(args);
 
@@ -697,12 +555,9 @@ public class GPRA_Principal {
 				parameters.set(new Parameter("gp.koza.xover.maxdepth"), ""+p_args.getInt("tree_size"));
 				parameters.set(new Parameter("gp.koza.mutate.maxdepth"), ""+p_args.getInt("tree_size"));
 
-				parameters.set(new Parameter("linear_multiobj"), p_args.getBoolean("linear_multiobj").toString());
+				int archiveSize = (int) Math.ceil((double) p_args.getInt("numi") * 0.2);
+				parameters.set(new Parameter("breed.elite.0"), "" + archiveSize);
 
-                parameters.set(new Parameter("novelty_coef"), p_args.getDouble("novelty_coef").toString());
-                parameters.set(new Parameter("diversity_coef"), p_args.getDouble("diversity_coef").toString());
-
-				parameters.set(new Parameter("spea_multiobj"), p_args.getBoolean("spea_multiobj").toString());
 
 				//parametros criados por mim em tempo de execucao
 
@@ -802,6 +657,10 @@ public class GPRA_Principal {
 					if (!best_inds_dir.exists())
 						best_inds_dir.mkdir();
 
+					String archiveDir = best_inds_dir.toString() + "/archive-u" + part + "-run" + run + "/";
+
+					saveArchive(evaluatedState, archiveDir);
+
 					OutputStream out_stream_bestind = new FileOutputStream(best_inds_dir.toString()+"/u"+part+".run"+run+".bestind");
 					DataOutputStream data_out_stream = new DataOutputStream(out_stream_bestind);
 					best_inds[0].writeIndividual(evaluatedState, data_out_stream);
@@ -892,6 +751,30 @@ public class GPRA_Principal {
 		total_time2 = System.currentTimeMillis() - total_time2;
 
 		System.out.println("Total Time: "+total_time2);
+	}
+
+	private static void saveArchive(EvolutionState state, String dirPath) {
+		File dir = new File(dirPath);
+		if (!dir.exists())
+			dir.mkdir();
+
+		int subpopulationNum = 0;
+		Subpopulation subpopulation = state.population.subpops[subpopulationNum];
+		Individual individuals[] = subpopulation.individuals;
+		int archiveSize = ((SimpleBreeder)state.breeder).numElites(state, subpopulationNum);
+		int archiveStart = subpopulation.individuals.length - archiveSize;
+
+		for (int i = 0; i < archiveSize; i++) {
+			String individualPath = dirPath + "ind" + i;
+
+			try {
+				DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(individualPath));
+				individuals[archiveStart + i].writeIndividual(state, outputStream);
+				outputStream.close();
+			} catch (IOException e) {
+				System.err.println("Couldn't save individual to archive: " + individualPath);
+			}
+		}
 	}
 	//}
 }
