@@ -178,7 +178,7 @@ multi.fitness.num-objectives 	= 3
 # max and min values of all each objective function
 multi.fitness.max 		= 1
 multi.fitness.min 		= 0
-
+multi.fitness.maximize = true
 
 # breed.elite.0 =	10
 # Archive size is being set as 20% of number of individuals

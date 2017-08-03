@@ -1,35 +1,9 @@
 package ec.app.gpra;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import ec.*;
 import ec.simple.SimpleBreeder;
@@ -758,6 +732,8 @@ public class GPRA_Principal {
 		if (!dir.exists())
 			dir.mkdir();
 
+		StringBuilder archiveLog = new StringBuilder();
+
 		int subpopulationNum = 0;
 		Subpopulation subpopulation = state.population.subpops[subpopulationNum];
 		Individual individuals[] = subpopulation.individuals;
@@ -765,15 +741,27 @@ public class GPRA_Principal {
 		int archiveStart = subpopulation.individuals.length - archiveSize;
 
 		for (int i = 0; i < archiveSize; i++) {
+			Individual individual = individuals[archiveStart + i];
+
+			archiveLog.append("Individual ").append(i).append("\n");
+			archiveLog.append(individual.fitness.fitnessToStringForHumans()).append("\n\n");
+
 			String individualPath = dirPath + "ind" + i;
 
 			try {
 				DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(individualPath));
-				individuals[archiveStart + i].writeIndividual(state, outputStream);
+				individual.writeIndividual(state, outputStream);
 				outputStream.close();
 			} catch (IOException e) {
 				System.err.println("Couldn't save individual to archive: " + individualPath);
 			}
+		}
+
+		String archiveLogPath = dirPath + "archive_fitnesses.log";
+		try (PrintStream out = new PrintStream(new FileOutputStream(archiveLogPath))) {
+			out.print(archiveLog.toString());
+		} catch (FileNotFoundException e) {
+			System.err.println("Couldn't save the archive fitnesses log!");
 		}
 	}
 	//}
