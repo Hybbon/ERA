@@ -300,8 +300,8 @@ public class GPRA_Problem extends GPProblem implements
                 double epc_test_aux = Metrics.epc(testRanking, dados.popularityByItem, numItemsToSuggest);
                 double epc_val_aux = Metrics.epc(validationRanking, dados.popularityByItem, numItemsToSuggest);
 
-                double eild_test_aux = Metrics.eild(testRanking, dados.similarityMatrix, numItemsToSuggest);
-                double eild_val_aux = Metrics.eild(validationRanking, dados.similarityMatrix, numItemsToSuggest);
+                double eild_test_aux = Metrics.eild(testRanking, dados.distanceMatrix, numItemsToSuggest);
+                double eild_val_aux = Metrics.eild(validationRanking, dados.distanceMatrix, numItemsToSuggest);
 
                 epc_test += epc_test_aux;
                 epc_val += epc_val_aux;
