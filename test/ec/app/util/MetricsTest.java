@@ -57,14 +57,14 @@ public class MetricsTest {
         matrix.add(2, 2, 1);
 
         // Matrix is initialized directly, to avoid having to specify the likers one by one.
-        CosineSimilarityMatrix similarityMatrix = new CosineSimilarityMatrix(matrix, indexByItemId);
+        CosineDistanceMatrix distanceMatrix = new CosineDistanceMatrix(matrix, indexByItemId);
 
         double eildK0 = (2 / Math.sqrt(6) + 0.85 / Math.sqrt(3)) / 1.85;
         double eildK1 = (2 / Math.sqrt(6) + 1 / Math.sqrt(2)) / 2;
         double eildK2 = (1 / Math.sqrt(3) + 1 / Math.sqrt(2)) / 2;
 
         double expectedEild = (eildK0 + eildK1 * 0.85 + eildK2 * Math.pow(0.85, 2)) / (1 + 0.85 + Math.pow(0.85, 2));
-        double eild = Metrics.eild(ranking, similarityMatrix, 3);
+        double eild = Metrics.eild(ranking, distanceMatrix, 3);
         Assert.assertEquals(expectedEild, eild, 0.000001);
     }
 }

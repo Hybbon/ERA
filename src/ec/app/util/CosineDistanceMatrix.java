@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Describe this class and the methods exposed by it.
  */
-public class CosineSimilarityMatrix {
+public class CosineDistanceMatrix {
     private DenseMatrix mMatrix;
     private Map<Integer, Integer> mIndexByItemId;
 
@@ -69,7 +69,7 @@ public class CosineSimilarityMatrix {
         return intersectionSize / denominator;
     }
 
-    public CosineSimilarityMatrix(Map<Integer, Vector<Integer>> likedItemsByUser) {
+    public CosineDistanceMatrix(Map<Integer, Vector<Integer>> likedItemsByUser) {
         Map<Integer, Vector<Integer>> likersByItem = computeLikers(likedItemsByUser);
 
         int numItems = likersByItem.size();
@@ -80,8 +80,8 @@ public class CosineSimilarityMatrix {
         for (Integer itemId : likersByItem.keySet()) {
             mIndexByItemId.put(itemId, i);
 
-            // Similarity is 1 between the item and itself.
-            mMatrix.add(i, i, 1.);
+            // Distance is 0 between the item and itself.
+            mMatrix.add(i, i, 0.);
 
             i++;
         }
@@ -94,25 +94,25 @@ public class CosineSimilarityMatrix {
                     continue;
                 }
 
-                double similarity = cosineSimilarity(likersByItem.get(itemA), likersByItem.get(itemB));
+                double distance = 1 - cosineSimilarity(likersByItem.get(itemA), likersByItem.get(itemB));
                 int indexA = mIndexByItemId.get(itemA);
                 int indexB = mIndexByItemId.get(itemB);
 
-                mMatrix.add(indexA, indexB, similarity);
-                mMatrix.add(indexB, indexA, similarity);
+                mMatrix.add(indexA, indexB, distance);
+                mMatrix.add(indexB, indexA, distance);
             }
         }
     }
 
     // Direct constructor for test purposes.
-    public CosineSimilarityMatrix(DenseMatrix matrix, Map<Integer, Integer> indexByItemId) {
+    public CosineDistanceMatrix(DenseMatrix matrix, Map<Integer, Integer> indexByItemId) {
         mMatrix = matrix;
         mIndexByItemId = indexByItemId;
     }
 
     public double get(int itemI, int itemJ) {
         if (!mIndexByItemId.containsKey(itemI) || !mIndexByItemId.containsKey(itemJ)) {
-            return 0.;
+            return 1.;
         }
 
         return mMatrix.get(mIndexByItemId.get(itemI), mIndexByItemId.get(itemJ));

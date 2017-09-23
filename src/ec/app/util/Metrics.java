@@ -329,7 +329,7 @@ public class Metrics {
         return total / normalizingConstant;
     }
 
-	public static double eild(Vector<Integer> ranking, CosineSimilarityMatrix similarityMatrix, int num_items) {
+	public static double eild(Vector<Integer> ranking, CosineDistanceMatrix distanceMatrix, int num_items) {
 		if (num_items > ranking.size()) {
 			num_items = ranking.size();
 		}
@@ -350,10 +350,10 @@ public class Metrics {
 
 				int itemJ = ranking.get(j);
 
-			    double similarity = similarityMatrix.get(itemI, itemJ);
+			    double distance = distanceMatrix.get(itemI, itemJ);
 			    double relativeDiscount = Math.pow(DISCOUNT_BASE, Math.max(0, j - i - 1));
 
-			    totalForI += similarity * relativeDiscount;
+			    totalForI += distance * relativeDiscount;
 			    relativeNormalizingConstant += relativeDiscount;
 			}
 

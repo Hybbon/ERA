@@ -10,7 +10,7 @@ import java.util.Vector;
 /**
  * Describe this class and the methods exposed by it.
  */
-public class testCosineSimilarityMatrix {
+public class testCosineDistanceMatrix {
 
     @Test
     public void testConstructAndGet() {
@@ -29,14 +29,14 @@ public class testCosineSimilarityMatrix {
         likedByUser3.add(3);
         likedItemsByUser.put(3, likedByUser3);
 
-        CosineSimilarityMatrix m = new CosineSimilarityMatrix(likedItemsByUser);
+        CosineDistanceMatrix m = new CosineDistanceMatrix(likedItemsByUser);
 
-        Assert.assertEquals(1., m.get(2, 2), 0.000001);
-        Assert.assertEquals(1., m.get(3, 3), 0.000001);
+        Assert.assertEquals(0., m.get(2, 2), 0.000001);
+        Assert.assertEquals(0., m.get(3, 3), 0.000001);
         Assert.assertEquals(.5, m.get(2, 3), 0.000001);
         Assert.assertEquals(.5, m.get(3, 2), 0.000001);
 
-        Assert.assertEquals(0., m.get(1, 2), 0.000001);
+        Assert.assertEquals(1., m.get(1, 2), 0.000001);
     }
 
     @Test
@@ -47,10 +47,10 @@ public class testCosineSimilarityMatrix {
         likedByUser1.add(1);
         likedByUser1.add(2);
         likedItemsByUser.put(1, likedByUser1);
-        CosineSimilarityMatrix m = new CosineSimilarityMatrix(likedItemsByUser);
-        Assert.assertEquals(1., m.get(1, 1), 0.000001);
-        Assert.assertEquals(1., m.get(1, 2), 0.000001);
-        Assert.assertEquals(1., m.get(2, 1), 0.000001);
-        Assert.assertEquals(1., m.get(2, 2), 0.000001);
+        CosineDistanceMatrix m = new CosineDistanceMatrix(likedItemsByUser);
+        Assert.assertEquals(0., m.get(1, 1), 0.000001);
+        Assert.assertEquals(0., m.get(1, 2), 0.000001);
+        Assert.assertEquals(0., m.get(2, 1), 0.000001);
+        Assert.assertEquals(0., m.get(2, 2), 0.000001);
     }
 }

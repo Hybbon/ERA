@@ -67,7 +67,7 @@ public class GPRA_Principal {
 	private static Individual best_individual_all;
 	private static boolean need_backup = false;
 	public static boolean use_outrank = true;
-	private static int nruns = 5;
+	private static int nruns;
 	private static int nthreads = 1;
 	private static boolean runGP = true;
 	private static int use_niching = 0;
@@ -455,10 +455,10 @@ public class GPRA_Principal {
 
 		Namespace p_args = ParameterParser.parse_arguments(args);
 
+		nruns = p_args.getInt("nruns");
 
 		out_dir_global = p_args.getString("out_dir");
 
-		//int nruns = 5;
 		File output_dir = new File(p_args.getString("out_dir"));
 		if (!output_dir.exists())
 			output_dir.mkdir();

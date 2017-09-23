@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 //import lda_gpra.LDAUser;
 import ec.app.exceptions.MalformedRatingLineException;
 import ec.app.gpra.GPRA_Principal;
-import ec.app.util.CosineSimilarityMatrix;
+import ec.app.util.CosineDistanceMatrix;
 import ec.app.util.Metrics;
 import ec.app.util.Utils;
 
@@ -27,7 +27,7 @@ public class InputData {
 	//private HashMap<Integer, Integer> map_posicao_item;
 	public Map<Integer, Vector<Integer>> testRankings;
 
-	public CosineSimilarityMatrix similarityMatrix;
+	public CosineDistanceMatrix distanceMatrix;
 	public Map<Integer, Double> popularityByItem;
 	
 	public Vector<User> Usuarios;
@@ -770,7 +770,7 @@ public class InputData {
             return;
         }
 
-        similarityMatrix = new CosineSimilarityMatrix(likedItemsByUser);
+        distanceMatrix = new CosineDistanceMatrix(likedItemsByUser);
         popularityByItem = Utils.compute_popularity(likedItemsByUser);
     }
 }
