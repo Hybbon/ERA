@@ -56,75 +56,75 @@ public class MySimpleEvolutionState extends ec.simple.SimpleEvolutionState{
 		//######################################################################
 
 		//Verify how many generations without improve
-		if (generation == 1)
-			pastFit = mystat.getbestFitnessVal();
+//		if (generation == 1)
+//			pastFit = mystat.getbestFitnessVal();
+//
+//
+//		double fit = mystat.getbestFitnessVal();
+//
+//		if(Math.abs(fit - pastFit) < 0.0001)
+//		{
+//			itersWithoutImprove++;
+//		}else
+//		{
+//			pastFit = fit;
+//			itersWithoutImprove = 0;
+//		}
 
 
-		double fit = mystat.getbestFitnessVal();
+		// Not quitting on iterations without improvement on SPEA
+//        if(itersWithoutImprove == maxIterWithoutImprove-1){
+//            output.message("Achieved " + maxIterWithoutImprove + "generations without improve");
+//            alternativeOutWritter.write("Achieved " + maxIterWithoutImprove + "generations without improve");
+//            alternativeOutWritter.close();
+//
+//            return R_FAILURE;
+//        }
 
-		if(Math.abs(fit - pastFit) < 0.0001)
-		{
-			itersWithoutImprove++;
-		}else
-		{
-			pastFit = fit;
-			itersWithoutImprove = 0;
-		}
+        // SHOULD WE QUIT?
+        if (evaluator.runComplete(this) && quitOnRunComplete)
+        {
+            output.message("Found Ideal Individual");
 
-		
-		//SHOULD WE QUIT?
-				if(itersWithoutImprove == maxIterWithoutImprove-1){
-					output.message("Achieved " + maxIterWithoutImprove + "generations without improve");
-					alternativeOutWritter.write("Achieved " + maxIterWithoutImprove + "generations without improve");
-					alternativeOutWritter.close();
+            alternativeOutWritter.close();
+            return R_SUCCESS;
+        }
 
-					return R_FAILURE;
-				}
+        // SHOULD WE QUIT?
+        if (generation == numGenerations-1)
+        {
+            alternativeOutWritter.close();
+            return R_FAILURE;
+        }
 
-				// SHOULD WE QUIT?
-				if (evaluator.runComplete(this) && quitOnRunComplete)
-				{
-					output.message("Found Ideal Individual");
+        // PRE-BREEDING EXCHANGING
+        statistics.prePreBreedingExchangeStatistics(this);
+        population = exchanger.preBreedingExchangePopulation(this);
+        statistics.postPreBreedingExchangeStatistics(this);
 
-					alternativeOutWritter.close();
-					return R_SUCCESS;
-				}
+        String exchangerWantsToShutdown = exchanger.runComplete(this);
+        if (exchangerWantsToShutdown!=null)
+        {
+            output.message(exchangerWantsToShutdown);
+            /*
+             * Don't really know what to return here.  The only place I could
+             * find where runComplete ever returns non-null is
+             * IslandExchange.  However, that can return non-null whether or
+             * not the ideal individual was found (for example, if there was
+             * a communication error with the server).
+             *
+             * Since the original version of this code didn't care, and the
+             * result was initialized to R_SUCCESS before the while loop, I'm
+             * just going to return R_SUCCESS here.
+             */
 
-				// SHOULD WE QUIT?
-				if (generation == numGenerations-1)
-				{
-					alternativeOutWritter.close();
-					return R_FAILURE;
-				}
+            return R_SUCCESS;
+        }
 
-				// PRE-BREEDING EXCHANGING
-				statistics.prePreBreedingExchangeStatistics(this);
-				population = exchanger.preBreedingExchangePopulation(this);
-				statistics.postPreBreedingExchangeStatistics(this);
+        // BREEDING
+        statistics.preBreedingStatistics(this);
 
-				String exchangerWantsToShutdown = exchanger.runComplete(this);
-				if (exchangerWantsToShutdown!=null)
-				{ 
-					output.message(exchangerWantsToShutdown);
-					/*
-					 * Don't really know what to return here.  The only place I could
-					 * find where runComplete ever returns non-null is 
-					 * IslandExchange.  However, that can return non-null whether or
-					 * not the ideal individual was found (for example, if there was
-					 * a communication error with the server).
-					 * 
-					 * Since the original version of this code didn't care, and the
-					 * result was initialized to R_SUCCESS before the while loop, I'm 
-					 * just going to return R_SUCCESS here. 
-					 */
-
-					return R_SUCCESS;
-				}
-
-				// BREEDING
-				statistics.preBreedingStatistics(this);
-
-				//Fitness Sharing
+        //Fitness Sharing
 //				Vector<Vector<MyIndividual>> niches = count_individuals_with_equal_fitness();
 //				use_niching = GPRA_Principal.get_use_niching();
 //				if (use_niching == 1){
@@ -144,34 +144,34 @@ public class MySimpleEvolutionState extends ec.simple.SimpleEvolutionState{
 //				for (int n = 0 ; n < niches.size(); n++){
 //					niches_str += niches.get(n).size()+",";
 //				}
-				//alternativeOutWritter.write(niches_str+"\n");
-				alternativeOutWritter.write("\n");
+        //alternativeOutWritter.write(niches_str+"\n");
+        alternativeOutWritter.write("\n");
 
-				alternativeOutWritter.flush();
-				//End Fitness Sharing
+        alternativeOutWritter.flush();
+        //End Fitness Sharing
 
 
-				population = breeder.breedPopulation(this);
+        population = breeder.breedPopulation(this);
 
-				// POST-BREEDING EXCHANGING
-				statistics.postBreedingStatistics(this);
+        // POST-BREEDING EXCHANGING
+        statistics.postBreedingStatistics(this);
 
-				// POST-BREEDING EXCHANGING
-				statistics.prePostBreedingExchangeStatistics(this);
-				population = exchanger.postBreedingExchangePopulation(this); //didn't do anything
-				statistics.postPostBreedingExchangeStatistics(this);
+        // POST-BREEDING EXCHANGING
+        statistics.prePostBreedingExchangeStatistics(this);
+        population = exchanger.postBreedingExchangePopulation(this); //didn't do anything
+        statistics.postPostBreedingExchangeStatistics(this);
 
-				// INCREMENT GENERATION AND CHECKPOINT
-				generation++;
-				if (checkpoint && generation%checkpointModulo == 0) 
-				{
-					output.message("Checkpointing");
-					statistics.preCheckpointStatistics(this);
-					Checkpoint.setCheckpoint(this);
-					statistics.postCheckpointStatistics(this);
-				}
+        // INCREMENT GENERATION AND CHECKPOINT
+        generation++;
+        if (checkpoint && generation%checkpointModulo == 0)
+        {
+            output.message("Checkpointing");
+            statistics.preCheckpointStatistics(this);
+            Checkpoint.setCheckpoint(this);
+            statistics.postCheckpointStatistics(this);
+        }
 
-				return R_NOTDONE;
+        return R_NOTDONE;
 	}
 
 	
