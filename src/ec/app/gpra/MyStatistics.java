@@ -10,42 +10,41 @@ import ec.multiobjective.MultiObjectiveFitness;
 
 public class MyStatistics {
 
-	public double getbestFitnessVal() {
-		return 0.;
-	}
+    public double getbestFitnessVal() {
+        return 0.;
+    }
 
 
-	private static String indFitnessString(MyIndividual ind) {
-		MultiObjectiveFitness f = (MultiObjectiveFitness) ind.fitness;
-		double[] objectives = f.getObjectives();
-		return "[" + objectives[0] + ", " + objectives[1] + ", " + objectives[2] + "]";
-	}
+    private static String indFitnessString(MyIndividual ind) {
+        MultiObjectiveFitness f = (MultiObjectiveFitness) ind.fitness;
+        double[] objectives = f.getObjectives();
+        return "[" + objectives[0] + ", " + objectives[1] + ", " + objectives[2] + "]";
+    }
 
-	public MyStatistics(Population pop){
-		
-		Subpopulation subpop = pop.subpops[0];
-		int subpopSize = subpop.individuals.length;
+    public MyStatistics(Population pop) {
 
-		for(int i  = 0; i < subpopSize; i++){
+        Subpopulation subpop = pop.subpops[0];
+        int subpopSize = subpop.individuals.length;
 
-			MyIndividual ind = (MyIndividual) subpop.individuals[i];
+        for (int i = 0; i < subpopSize; i++) {
+
+            MyIndividual ind = (MyIndividual) subpop.individuals[i];
 
 //			System.out.println("Individual " + i);
 //			System.out.println(indFitnessString(ind));
 
 
-		}
-	}
+        }
+    }
 
 
-	
-	public String toString(){
-		
-		String s = "";
+    public String toString() {
 
-		return s;
-		
-		
-	}
+        String s = "";
+
+        return s;
+
+
+    }
 
 }
