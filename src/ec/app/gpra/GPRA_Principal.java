@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.*;
 
 import ec.*;
+import ec.multiobjective.MultiObjectiveFitness;
 import ec.simple.SimpleBreeder;
 import net.sourceforge.argparse4j.inf.Namespace;
 import ec.app.data.InputData;
@@ -505,7 +506,6 @@ public class GPRA_Principal {
                 parameters.set(new Parameter("generations"), "" + p_args.getInt("numg"));
                 parameters.set(new Parameter("breedthreads"), "" + p_args.getInt("nthreads"));
                 parameters.set(new Parameter("evalthreads"), "" + p_args.getInt("nthreads"));
-                parameters.set(new Parameter("pop.subpop.0.size"), "" + p_args.getInt("numi"));
                 parameters.set(new Parameter("pop.subpop.0.species.pipe.source.0.prob"), "" + p_args.getDouble("xover"));
                 parameters.set(new Parameter("pop.subpop.0.species.pipe.source.1.prob"), "" + p_args.getDouble("mut"));
                 parameters.set(new Parameter("pop.subpop.0.species.pipe.source.2.prob"), "" + p_args.getDouble("rep"));
@@ -513,9 +513,12 @@ public class GPRA_Principal {
                 parameters.set(new Parameter("gp.koza.xover.maxdepth"), "" + p_args.getInt("tree_size"));
                 parameters.set(new Parameter("gp.koza.mutate.maxdepth"), "" + p_args.getInt("tree_size"));
 
-                int archiveSize = (int) Math.ceil((double) p_args.getInt("numi") * 0.2);
+                int numIndividuals = p_args.getInt("numi");
+                int archiveSize = (int) Math.ceil((double) numIndividuals * 1.);
+                // Population includes the archive at the end! (spea2 README)
+                int populationSize = numIndividuals + archiveSize;
+                parameters.set(new Parameter("pop.subpop.0.size"), "" + populationSize);
                 parameters.set(new Parameter("breed.elite.0"), "" + archiveSize);
-
 
                 //parametros criados por mim em tempo de execucao
 
@@ -611,9 +614,9 @@ public class GPRA_Principal {
                     if (!best_inds_dir.exists())
                         best_inds_dir.mkdir();
 
-                    String archiveDir = best_inds_dir.toString() + "/archive-u" + part + "-run" + run + "/";
+                    String frontDir = best_inds_dir.toString() + "/front-u" + part + "-run" + run + "/";
 
-                    saveArchive(evaluatedState, archiveDir);
+                    saveParetoFront(evaluatedState, frontDir);
 
                     OutputStream out_stream_bestind = new FileOutputStream(best_inds_dir.toString() + "/u" + part + ".run" + run + ".bestind");
                     DataOutputStream data_out_stream = new DataOutputStream(out_stream_bestind);
@@ -705,24 +708,23 @@ public class GPRA_Principal {
         System.out.println("Total Time: " + total_time2);
     }
 
-    private static void saveArchive(EvolutionState state, String dirPath) {
+    private static void saveParetoFront(EvolutionState state, String dirPath) {
         File dir = new File(dirPath);
         if (!dir.exists())
             dir.mkdir();
 
-        StringBuilder archiveLog = new StringBuilder();
+        StringBuilder frontLog = new StringBuilder();
 
         int subpopulationNum = 0;
         Subpopulation subpopulation = state.population.subpops[subpopulationNum];
-        Individual individuals[] = subpopulation.individuals;
-        int archiveSize = ((SimpleBreeder) state.breeder).numElites(state, subpopulationNum);
-        int archiveStart = subpopulation.individuals.length - archiveSize;
 
-        for (int i = 0; i < archiveSize; i++) {
-            Individual individual = individuals[archiveStart + i];
+        List<Individual> front = MultiObjectiveFitness.partitionIntoParetoFront(subpopulation.individuals, null, null);
 
-            archiveLog.append("Individual ").append(i).append("\n");
-            archiveLog.append(individual.fitness.fitnessToStringForHumans()).append("\n\n");
+        for (int i = 0; i < front.size(); i++) {
+            Individual individual = front.get(i);
+
+            frontLog.append("Individual ").append(i).append("\n");
+            frontLog.append(individual.fitness.fitnessToStringForHumans()).append("\n\n");
 
             String individualPath = dirPath + "ind" + i;
 
@@ -731,15 +733,15 @@ public class GPRA_Principal {
                 individual.writeIndividual(state, outputStream);
                 outputStream.close();
             } catch (IOException e) {
-                System.err.println("Couldn't save individual to archive: " + individualPath);
+                System.err.println("Couldn't save individual to front: " + individualPath);
             }
         }
 
-        String archiveLogPath = dirPath + "archive_fitnesses.log";
-        try (PrintStream out = new PrintStream(new FileOutputStream(archiveLogPath))) {
-            out.print(archiveLog.toString());
+        String frontLogPath = dirPath + "front_fitnesses.log";
+        try (PrintStream out = new PrintStream(new FileOutputStream(frontLogPath))) {
+            out.print(frontLog.toString());
         } catch (FileNotFoundException e) {
-            System.err.println("Couldn't save the archive fitnesses log!");
+            System.err.println("Couldn't save the front fitnesses log!");
         }
     }
     //}
