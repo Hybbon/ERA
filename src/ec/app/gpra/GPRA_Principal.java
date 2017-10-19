@@ -520,7 +520,9 @@ public class GPRA_Principal {
                 parameters.set(new Parameter("pop.subpop.0.size"), "" + populationSize);
                 parameters.set(new Parameter("breed.elite.0"), "" + archiveSize);
 
-                //parametros criados por mim em tempo de execucao
+                int numObjectives = 2;
+                parameters.set(new Parameter("multi.fitness.num-objectives"), "" + numObjectives);
+
 
                 if (use_niching == 1)
                     parameters.set(new Parameter("gpra.niching.fitness_tshare"), "" + tshare);

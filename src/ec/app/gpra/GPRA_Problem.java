@@ -324,9 +324,9 @@ public class GPRA_Problem extends GPProblem implements
             MultiObjectiveFitness f = (MultiObjectiveFitness) ind.fitness;
             double[] objectives = f.getObjectives();
 
-            objectives[0] = map_val;
-            objectives[1] = mean_epc_val;
-            objectives[2] = mean_eild_val;
+            objectives[0] = map_val; // Precision
+            objectives[1] = mean_epc_val; // Novelty
+            // objectives[2] = mean_eild_val; // Diversity
 
             ((MyIndividual) ind).setValidationHits(mean_hits_sug / dados.getNumUsersValHasElem());
             ((MyIndividual) ind).setValidationHits_use(mean_hits_use / dados.getNumUsersValHasElem());
