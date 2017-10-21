@@ -308,17 +308,15 @@ public class GPRA_Problem extends GPProblem implements
 				prec_val += prec_val_aux;
 
 				if (linearMultiObj) {
-                    double epc_test_aux = Metrics.epc(testRanking, dados.popularityByItem, numItemsToSuggest);
-                    double epc_val_aux = Metrics.epc(validationRanking, dados.popularityByItem, numItemsToSuggest);
+                    double epc = Metrics.epc(saida_items, dados.popularityByItem, numItemsToSuggest);
 
-                    double eild_test_aux = Metrics.eild(testRanking, dados.distanceMatrix, numItemsToSuggest);
-                    double eild_val_aux = Metrics.eild(validationRanking, dados.distanceMatrix, numItemsToSuggest);
+                    double eild = Metrics.eild(saida_items, dados.distanceMatrix, numItemsToSuggest);
 
-                    epc_test += epc_test_aux;
-                    epc_val += epc_val_aux;
+                    epc_test += epc;
+                    epc_val += epc;
 
-                    eild_test += eild_test_aux;
-                    eild_val += eild_val_aux;
+                    eild_test += eild;
+                    eild_val += eild;
                 }
 
 				//*************************LOG******************
