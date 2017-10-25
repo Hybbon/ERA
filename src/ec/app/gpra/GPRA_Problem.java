@@ -294,17 +294,14 @@ public class GPRA_Problem extends GPProblem implements
                 prec_test += prec_test_aux;
                 prec_val += prec_val_aux;
 
-                double epc_test_aux = Metrics.epc(saida_items, dados.popularityByItem, numItemsToSuggest);
-                double epc_val_aux = Metrics.epc(saida_items, dados.popularityByItem, numItemsToSuggest);
+                double epc_aux = Metrics.epc(saida_items, dados.popularityByItem, numItemsToSuggest);
+                double eild_aux = Metrics.eild(saida_items, dados.distanceMatrix, numItemsToSuggest);
 
-                double eild_test_aux = Metrics.eild(saida_items, dados.distanceMatrix, numItemsToSuggest);
-                double eild_val_aux = Metrics.eild(saida_items, dados.distanceMatrix, numItemsToSuggest);
+                epc_test += epc_aux;
+                epc_val += epc_aux;
 
-                epc_test += epc_test_aux;
-                epc_val += epc_val_aux;
-
-                eild_test += eild_test_aux;
-                eild_val += eild_val_aux;
+                eild_test += eild_aux;
+                eild_val += eild_aux;
             }
 
             ((MyIndividual) ind).setPrec_5(new double[]{prec_5_t, prec_5_v});
@@ -325,7 +322,8 @@ public class GPRA_Problem extends GPProblem implements
             double[] objectives = f.getObjectives();
 
             objectives[0] = map_val; // Precision
-            objectives[1] = mean_epc_val; // Novelty
+            objectives[1] = 0.5; // Novelty
+            // objectives[1] = mean_epc_val; // Novelty
             // objectives[2] = mean_eild_val; // Diversity
 
             ((MyIndividual) ind).setValidationHits(mean_hits_sug / dados.getNumUsersValHasElem());
