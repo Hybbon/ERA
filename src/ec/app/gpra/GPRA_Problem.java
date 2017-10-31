@@ -322,8 +322,8 @@ public class GPRA_Problem extends GPProblem implements
             double[] objectives = f.getObjectives();
 
             objectives[0] = map_val; // Precision
-            objectives[1] = 0.5; // Novelty
-            // objectives[1] = mean_epc_val; // Novelty
+            // objectives[1] = 0.5; // Novelty
+            objectives[1] = mean_epc_val; // Novelty
             // objectives[2] = mean_eild_val; // Diversity
 
             ((MyIndividual) ind).setValidationHits(mean_hits_sug / dados.getNumUsersValHasElem());

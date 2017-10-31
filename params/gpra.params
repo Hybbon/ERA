@@ -5,7 +5,7 @@
 #foi preciso setar o arquivo relativo a uma classe pois o java perdia a referencia qdo o arquivo era chamada de dentro de um jar
 parent.0 = @ec.gp.koza.GPKozaDefaults koza.params
 
-print-params = false
+print-params = true
 print-accessed-params = false
 print-used-params = false
 #stat = ec.gp.koza.KozaShortStatistics
@@ -102,7 +102,7 @@ gp.fs.0 = ec.gp.GPFunctionSet
 gp.fs.0.name = f0
 
 # We have five functions in the function set.  They are:
-gp.fs.0.size = 19
+gp.fs.0.size = 25
 
 #funcoes
 
