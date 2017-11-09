@@ -725,6 +725,8 @@ public class GPRA_Principal {
         for (int i = 0; i < front.size(); i++) {
             Individual individual = front.get(i);
 
+            individual.printIndividualForHumans(state, 0);
+
             frontLog.append("Individual ").append(i).append("\n");
             frontLog.append(individual.fitness.fitnessToStringForHumans()).append("\n\n");
 
