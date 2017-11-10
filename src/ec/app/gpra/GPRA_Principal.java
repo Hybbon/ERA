@@ -618,8 +618,6 @@ public class GPRA_Principal {
 
                     String frontDir = best_inds_dir.toString() + "/front-u" + part + "-run" + run + "/";
 
-                    saveParetoFront(evaluatedState, frontDir);
-
                     OutputStream out_stream_bestind = new FileOutputStream(best_inds_dir.toString() + "/u" + part + ".run" + run + ".bestind");
                     DataOutputStream data_out_stream = new DataOutputStream(out_stream_bestind);
                     best_inds[0].writeIndividual(evaluatedState, data_out_stream);
@@ -674,6 +672,13 @@ public class GPRA_Principal {
                         problem.evaluate(evaluatedState, inds[xi], 0, 0);
                     }
 
+                    Individual[] allInds = evaluatedState.population.subpops[0].individuals;
+                    for (int xi = 0; xi < allInds.length; xi++) {
+                        allInds[xi].evaluated = false;
+                        problem.evaluate(evaluatedState, allInds[xi], 0, 0);
+                    }
+
+
                     ((ec.Problem) problem).finishEvaluating(evaluatedState, 0);
 
                     out_reeval.write("Best Individual" + "\n");
@@ -683,6 +688,8 @@ public class GPRA_Principal {
                     System.out.println(inds[0].fitness.fitnessToStringForHumans());
 
                     out_reeval.close();
+
+                    saveParetoFront(evaluatedState, frontDir);
 
 
                     PrintWriter print_ranking = new PrintWriter(new BufferedWriter(
