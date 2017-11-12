@@ -861,9 +861,15 @@ public class GPRA_Principal {
 					double fit = 1-((KozaFitness)inds[0].fitness).standardizedFitness();
 					out_reeval.write(fit+"\n");
 
+					MyIndividual bestInd = (MyIndividual) inds[0];
+
 					System.out.println("BEST INDIVIDUAL RESULT");
-					System.out.println(inds[0].fitness.fitness());
-					System.out.println(inds[0].fitness.fitnessToStringForHumans());
+					System.out.println(bestInd.fitness.fitness());
+					System.out.println(bestInd.fitness.fitnessToStringForHumans());
+
+					String metrics = "Metrics: [" + bestInd.map + ", " + bestInd.epc + ", " + bestInd.eild + "]\n";
+					System.out.print(metrics);
+					out_reeval.write(metrics);
 
 					out_reeval.close();
 

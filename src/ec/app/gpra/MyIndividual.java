@@ -25,9 +25,11 @@ public class MyIndividual extends GPIndividual{
 	private double prec_10[] = new double[2];
 	private double map_5[] = new double[2];
 	private double map_10[] = new double[2];
-	
-	
-	
+
+	public double map;
+	public double epc;
+	public double eild;
+
 	public void setup(final EvolutionState state, final Parameter base){
 		super.setup(state, base);
 		

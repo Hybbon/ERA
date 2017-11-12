@@ -363,6 +363,9 @@ public class GPRA_Problem extends GPProblem implements
 			double val_fitness;
             double test_fitness;
 
+			MyIndividual myInd = (MyIndividual) ind;
+			myInd.map = map_test;
+
 			if (linearMultiObj) {
                 double mean_epc_test = epc_test/dados.getNumUsersTestHasElem();
                 double mean_epc_val = epc_val/dados.getNumUsersValHasElem();
@@ -370,6 +373,9 @@ public class GPRA_Problem extends GPProblem implements
                 double mean_eild_test = eild_test/dados.getNumUsersTestHasElem();
                 double mean_eild_val = eild_val/dados.getNumUsersValHasElem();
 
+                // Records fitness values for retrieval at the end of the run
+				myInd.epc = mean_epc_test;
+				myInd.eild = mean_eild_test;
 
                 val_fitness = map_val * map_fitness_weight +
                         mean_epc_val * epc_fitness_weight +
@@ -379,6 +385,9 @@ public class GPRA_Problem extends GPProblem implements
                         mean_epc_test * epc_fitness_weight +
                         mean_eild_test * eild_fitness_weight;
             } else {
+				myInd.epc = 0;
+				myInd.eild = 0;
+
                 val_fitness = map_val;
                 test_fitness = map_test;
             }
