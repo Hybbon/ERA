@@ -581,6 +581,8 @@ public class GPRA_Principal {
 
                     MySimpleEvolutionState evaluatedState = (MySimpleEvolutionState) Evolve.initialize(parameters, 0, outGP);
 
+                    evaluatedState.setUserShuffleRatio(0.5);
+
 
                     evaluatedState.setMaxIterWithoutImprove(p_args.getInt("max_iter"));
                     evaluatedState.setAternativeOutput(new File(p_args.getString("out_dir") + partition + ".run" + run + "_statistics"));
@@ -599,6 +601,7 @@ public class GPRA_Principal {
                     evaluatedState.writeAlternativeOutput(gpParams);
                     //##############################################################
 
+                    evaluatedState.sampleUserIndices();
                     evaluatedState.run(EvolutionState.C_STARTED_FRESH);
 
                     time = System.currentTimeMillis() - time;
@@ -653,6 +656,8 @@ public class GPRA_Principal {
                     //*******************Initialize Evolution State******************************
                     MySimpleEvolutionState evolution_state_reeval = (MySimpleEvolutionState) Evolve.initialize(parameters, 0);
                     evolution_state_reeval.startFresh();
+                    evolution_state_reeval.setUserShuffleRatio(1.);
+                    evolution_state_reeval.sampleUserIndices();
                     GPRA_Problem problem = (GPRA_Problem) evolution_state_reeval.evaluator.p_problem;
 
                     ((ec.Problem) problem).prepareToEvaluate(evolution_state_reeval, 0);
@@ -677,6 +682,9 @@ public class GPRA_Principal {
                         allInds[xi].evaluated = false;
                         problem.evaluate(evaluatedState, allInds[xi], 0, 0);
                     }
+
+//                    System.out.println("Sampled indices len " + evolution_state_reeval.getSampledUserIndices().size());
+//                    System.out.println("Users: " + dados_reeval.Usuarios.size());
 
 
                     ((ec.Problem) problem).finishEvaluating(evaluatedState, 0);

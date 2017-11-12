@@ -8,11 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 
 import ec.Individual;
 import ec.app.data.User;
@@ -32,12 +28,56 @@ public class MySimpleEvolutionState extends ec.simple.SimpleEvolutionState {
     private PrintWriter alternativeOutWritter = null;
     private boolean isAltOutputOpen = false;
 
+    private Random userIdGenerator;
+    private double userShuffleRatio;
+
+    private final int userIdGeneratorSeed = 71;
+
+    private Vector<Integer> sampledUserIndices;
+
+    public void setUserShuffleRatio(double ratio) {
+        userShuffleRatio = ratio;
+        userIdGenerator = new Random(userIdGeneratorSeed);
+    }
+
+    public void sampleUserIndices() {
+        Vector<User> users = GPRA_Principal.getData().getUsers();
+        int numUsersToSample = (int) (users.size() * userShuffleRatio);
+        sampledUserIndices = sampleIndices(users.size(), numUsersToSample);
+    }
+
+    public Vector<Integer> getSampledUserIndices() {
+        return sampledUserIndices;
+    }
+
+    private Vector<Integer> sampleIndices(int containerSize, int n) {
+
+        Vector<Integer> candidates = new Vector<>();
+        for (int i = 0; i < containerSize; i++) {
+            candidates.add(i);
+        }
+
+        Vector<Integer> out = new Vector<>();
+        for (int numCandidates = containerSize; numCandidates > containerSize - n; numCandidates--) {
+            int candidateIndex = userIdGenerator.nextInt(numCandidates);
+            int chosen = candidates.get(candidateIndex);
+            out.add(chosen);
+            candidates.set(candidateIndex, candidates.get(numCandidates - 1));
+        }
+        return out;
+    }
+
     public int evolve() {
         if (generation > 0)
             output.message("Generation " + generation);
 
         // EVALUATION
         statistics.preEvaluationStatistics(this);
+
+        if (generation % 10 == 0) {
+            sampleUserIndices();
+        }
+
         evaluator.evaluatePopulation(this);
         statistics.postEvaluationStatistics(this);
 
@@ -385,6 +425,7 @@ public class MySimpleEvolutionState extends ec.simple.SimpleEvolutionState {
 
         return perc_diff_items;
     }
+
 
 
 }

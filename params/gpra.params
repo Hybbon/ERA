@@ -5,7 +5,7 @@
 #foi preciso setar o arquivo relativo a uma classe pois o java perdia a referencia qdo o arquivo era chamada de dentro de um jar
 parent.0 = @ec.gp.koza.GPKozaDefaults koza.params
 
-print-params = true
+print-params = false
 print-accessed-params = false
 print-used-params = false
 #stat = ec.gp.koza.KozaShortStatistics

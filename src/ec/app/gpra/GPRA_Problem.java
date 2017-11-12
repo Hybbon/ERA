@@ -11,11 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectOutputStream.PutField;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 import ec.multiobjective.MultiObjectiveFitness;
 import ec.util.*;
@@ -48,15 +44,14 @@ public class GPRA_Problem extends GPProblem implements
     public int timesOnRankings = 0;
     public double outrank_score = 0;
 
+
     public void setup(final EvolutionState state, final Parameter base) {
-
-
         super.setup(state, base);
-        //TODO pegar os parâmetros a partir do arquivo de parametros
 
         System.out.println("Evaluation");
         dados = GPRA_Principal.getData();
         numUsedRanks = GPRA_Principal.getNumUsedRanks();
+
 
 
         //*******************************************************************
@@ -194,8 +189,13 @@ public class GPRA_Problem extends GPProblem implements
             double prec_5_t = 0, prec_5_v = 0, prec_10_t = 0, prec_10_v = 0;
             double map_5_t = 0, map_5_v = 0, map_10_t = 0, map_10_v = 0;
 
-            //itera pelos usuarios presentes nos rankings
-            for (int user_pos = 0; user_pos < users.size(); user_pos++) {
+            MySimpleEvolutionState myState = (MySimpleEvolutionState) state;
+            Vector<Integer> sampledUserIndices = myState.getSampledUserIndices();
+            System.out.println(sampledUserIndices);
+//            System.out.println(sampledUserIndices.size());
+//            System.out.println(users.size());
+
+            for (int user_pos : sampledUserIndices) {
 
                 Vector<Integer> saida_items = new Vector<Integer>();
                 Vector<Double> saida_scores = new Vector<Double>();
@@ -314,9 +314,12 @@ public class GPRA_Problem extends GPProblem implements
             //contudo, pode ser que um usuario esteja no teste mas não nos rankings de entrada
             //na ML1M isso acontece com o user 5850
 
-            double map_val = prec_val / dados.getNumUsersValHasElem();
-            double mean_epc_val = epc_val / dados.getNumUsersValHasElem();
-            double mean_eild_val = eild_val / dados.getNumUsersValHasElem();
+//            System.out.println(dados.getNumUsersValHasElem());
+//            System.out.println(sampledUserIndices.size());
+
+            double map_val = prec_val / sampledUserIndices.size();
+            double mean_epc_val = epc_val / sampledUserIndices.size();
+            double mean_eild_val = eild_val / sampledUserIndices.size();
 
             MultiObjectiveFitness f = (MultiObjectiveFitness) ind.fitness;
             double[] objectives = f.getObjectives();
@@ -332,30 +335,5 @@ public class GPRA_Problem extends GPProblem implements
             ind.evaluated = true;
         }
     }
-
-
-    public void insertInOrder(Pair<Integer, Double> x, Vector<Pair<Integer, Double>> vet) {
-
-
-        int i = 0;
-        while (x.getSecond() < vet.get(i).getSecond()) {
-            i++;
-        }
-
-        vet.insertElementAt(x, i); //insere o item na posicao correta de acordo com o seu score
-
-    }
-
-
-    public void set_num_used_rankings(int numRankings) {
-        // TODO Auto-generated method stub
-        numUsedRanks = numRankings;
-    }
-
-
-    public void initialize_input() {
-        this.input = new GPData();
-    }
-
 
 }
