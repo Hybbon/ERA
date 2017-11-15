@@ -191,7 +191,7 @@ public class GPRA_Problem extends GPProblem implements
 
             MySimpleEvolutionState myState = (MySimpleEvolutionState) state;
             Vector<Integer> sampledUserIndices = myState.getSampledUserIndices();
-            System.out.println(sampledUserIndices);
+//            System.out.println(sampledUserIndices);
 //            System.out.println(sampledUserIndices.size());
 //            System.out.println(users.size());
 
